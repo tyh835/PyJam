@@ -43,7 +43,7 @@ def list_buckets(**kwargs):
 @click.argument('bucket')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket, **kwargs):
-    """List objects in an S3 bucket [options]"""
+    """List objects in an S3 bucket <BUCKET> [options]"""
     s3 = set_client(**kwargs)
 
     print_objects(s3, bucket)
