@@ -1,11 +1,11 @@
-import boto3
 import click
+from pyjam.constants import version
 from pyjam.client import set_client
 from pyjam.utils.bucket import print_objects
 
 
 @click.group()
-@click.version_option(version='0.1.0')
+@click.version_option(version=version)
 def cli():
     """
     PyJAM deploys static sites to S3 and configures Route53 and CloudFront

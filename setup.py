@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from pyjam.constants import version
 
 setup(
     name='pyjam',
-    version='0.1.0',
+    version=version,
     author='Tony Han',
     author_email='itony9401@live.com',
     description='Pyjam automate static websites deployment to S3.',
