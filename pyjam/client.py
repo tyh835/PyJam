@@ -1,6 +1,6 @@
 import boto3
 
-def set_client(profile=None, **kwargs):
+def set_s3client(profile=None, **kwargs):
     session = boto3.Session()
 
     if profile:
@@ -8,6 +8,6 @@ def set_client(profile=None, **kwargs):
 
     s3 = session.resource('s3')
 
-    return s3
+    return s3, session
 
 

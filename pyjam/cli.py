@@ -1,6 +1,6 @@
 import click
 from pyjam.constants import version
-from pyjam.client import set_client
+from pyjam.client import set_s3client
 from pyjam.utils.bucket import print_objects
 
 
@@ -8,7 +8,7 @@ from pyjam.utils.bucket import print_objects
 @click.version_option(version=version)
 def cli():
     """
-    PyJAM deploys static sites to S3 and configures Route53 and CloudFront
+    PyJam deploys static sites to S3 and configures Route53 and CloudFront
 
     Append [options] to the end of the command
     """
@@ -17,7 +17,7 @@ def cli():
 
 """
 ***
-*** PyJAM list commands
+*** PyJam list commands
 ***
 """
 
@@ -31,7 +31,7 @@ def ls():
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_buckets(**kwargs):
     """List all S3 buckets [options]"""
-    s3 = set_client(**kwargs)
+    s3, _ = set_s3client(**kwargs)
 
     for bucket in s3.buckets.all():
         print('s3://' + bucket.name)
@@ -44,11 +44,23 @@ def list_buckets(**kwargs):
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket, **kwargs):
     """List objects in an S3 bucket <BUCKET> [options]"""
-    s3 = set_client(**kwargs)
+    s3, _ = set_s3client(**kwargs)
 
     print_objects(s3, bucket)
 
     return
+
+
+"""
+***
+*** PyJam list commands
+***
+"""
+
+@cli.group('setup')
+def setup():
+    """Command for setting up S3 buckets, Route53, and CloudFront"""
+    pass
 
 
 if __name__ == '__main__':
