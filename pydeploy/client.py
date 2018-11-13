@@ -1,14 +1,12 @@
 import boto3
 from botocore.exceptions import ClientError
 
-def set_client(region=None, profile=None, **kwargs):
+def set_client(profile=None, **kwargs):
     session = boto3.Session()
-    ec2 = session.resource('ec2')
 
     if profile:
         session = boto3.Session(profile_name=profile)
 
-    if region:
-        ec2 = session.resource('ec2', region_name=region)
+    s3 = session.resource('s3')
 
-    return ec2
+    return s3
