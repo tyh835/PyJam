@@ -1,4 +1,4 @@
-from pydeploy.pydeploy import cli
+from pydeploy.cli import cli
 
 if __name__ == '__main__':
     cli()
