@@ -6,7 +6,9 @@ Version: 0.1.0
 
 `pyjam` is a CLI tool to deploy static websites by syncing to an S3 bucket, and optionally configure Route53, and CloudFront.
 
-## Configuring
+Serving static site with rich functionalities on a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
+
+## Configuring for Development
 
 Run `pipenv install` in the file directory.
 
