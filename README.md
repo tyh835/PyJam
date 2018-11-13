@@ -21,3 +21,9 @@ Use the standard configuration on the AWS CLI. e.g.
 and add your Access and Secret keys.
 
 The profile should be an AWS power user (more restrictive permissions pending).
+
+## Commands
+
+`jam list buckets` - Lists all S3 buckets
+
+`jam list bucket <name>` - Lists all objects in an S3 bucket
