@@ -1,6 +1,6 @@
 import boto3
 import click
-from pydeploy.client import set_client
+from pydeploy.client import set_client, print_objects
 
 
 @click.group()
@@ -35,20 +35,19 @@ def list_buckets(**kwargs):
     for bucket in s3.buckets.all():
         print('s3://' + bucket.name)
 
+    return
 
-@ls.command('objects')
-@click.option('--bucket', default=None, help='List objects in the specified S3 bucket.')
+
+@ls.command('bucket')
+@click.argument('bucket')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket, **kwargs):
     """List objects in an S3 bucket [options]"""
     s3 = set_client(**kwargs)
 
-    if not bucket:
-        print('Error: --bucket option is required')
-        return
+    print_objects(s3, bucket)
 
-    for obj in s3.Bucket(bucket).objects.all():
-        print(obj.key)
+    return
 
 
 if __name__ == '__main__':
