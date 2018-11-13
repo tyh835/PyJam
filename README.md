@@ -1,2 +1,3 @@
-# pydeploy
-Deploy static website to S3, CloudFront, and Route53
+# PyDeploy
+
+`pydeploy` is a CLI tool to deploy static websites by syncing to a S3 bucket, and optionally configure Route53, and CloudFront.
