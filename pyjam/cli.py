@@ -64,7 +64,7 @@ def list_bucket_objects(bucket_name, **kwargs):
 @click.argument('bucket_name')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def sync(path_name, bucket_name, **kwargs):
-    """Sync contents of PATHNAME to BUCKET"""
+    """Sync contents of PATH to BUCKET"""
     s3, _ = set_s3client(**kwargs)
 
     sync_to_bucket(s3, bucket_name, path_name)
