@@ -75,7 +75,6 @@ def set_bucket_policy(bucket):
 
 
 def set_website_config(bucket):
-
     try:
         print(' Applying static site configurations to {0}...'.format(bucket.name))
         return bucket.Website().put(WebsiteConfiguration={
