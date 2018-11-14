@@ -12,6 +12,19 @@ def print_objects(s3, bucket):
     return
 
 
+def setup_s3_bucket(s3, region, bucket_name):
+    try:
+        bucket = create_bucket(s3, region, bucket_name)
+        set_bucket_policy(bucket)
+        set_website_config(bucket)
+        print('Success!')
+
+    except ClientError as err:
+        print('Failed to setup bucket {0}. '.format(bucket_name) + str(err))
+
+    return
+
+
 def create_bucket(s3, region, bucket_name):
     try:
         if region == 'us-east-1':

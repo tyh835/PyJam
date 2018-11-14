@@ -4,9 +4,7 @@ from pyjam.constants import version
 from pyjam.clients import set_s3client
 from pyjam.utils.bucket import (
     print_objects,
-    create_bucket,
-    set_bucket_policy,
-    set_website_config
+    setup_s3_bucket
 )
 
 
@@ -52,9 +50,7 @@ def list_bucket_objects(bucket_name, **kwargs):
     """List objects in an S3 bucket <NAME> [options]"""
     s3, _ = set_s3client(**kwargs)
 
-    print_objects(s3, bucket_name)
-
-    return
+    return print_objects(s3, bucket_name)
 
 
 """
@@ -76,16 +72,7 @@ def setup_bucket(bucket_name, **kwargs):
     s3, session = set_s3client(**kwargs)
     region = session.region_name
 
-    try:
-        bucket = create_bucket(s3, region, bucket_name)
-        set_bucket_policy(bucket)
-        set_website_config(bucket)
-        print('Success!')
-
-    except ClientError as err:
-        print('Failed to setup bucket {0}. '.format(bucket_name) + str(err))
-
-    return
+    return setup_s3_bucket(s3, region, bucket_name)
 
 
 if __name__ == '__main__':
