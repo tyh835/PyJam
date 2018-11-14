@@ -17,7 +17,7 @@ class S3Client:
         """Setup session and s3 ServiceResource"""
         self.session = boto3.Session(profile_name=profile) if profile else boto3.Session()
         self.s3 = self.session.resource('s3')
-        self.region = region
+        self.region = region or self.session.region_name
 
 
     def print_buckets(self):
