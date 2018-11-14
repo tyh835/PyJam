@@ -28,4 +28,4 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `jam list bucket <name>` - Lists all objects in an S3 bucket
 
-`jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting, configures existing bucket if it has been created.
+`jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Configures the bucket if it already exists.
