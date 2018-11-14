@@ -15,17 +15,11 @@ from pyjam.core.s3 import (
 class S3Client:
     """Class for S3 Client"""
 
-    def __init__(self, profile=None, region=None):
+    def __init__(self, **kwargs):
         """Setup session and s3 ServiceResource"""
-        if profile and region:
-            self.session = boto3.Session(profile_name=profile, region_name=region)
-        elif profile:
-            self.session = boto3.Session(profile_name=profile)
-        elif region:
-            self.session = boto3.Session(region_name=region)
-        else:
-            self.session = boto3.Session()
+        params = { key: value for key, value in kwargs.items() if value is not None }
 
+        self.session = boto3.Session(**params)
         self.s3 = self.session.resource('s3')
 
 

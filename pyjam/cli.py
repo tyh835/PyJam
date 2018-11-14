@@ -26,7 +26,7 @@ def ls():
 
 
 @ls.command('buckets')
-@click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
+@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile to use as credentials.')
 def list_buckets(**kwargs):
     """Lists all S3 buckets [options]"""
     client = S3Client(**kwargs)
@@ -35,7 +35,7 @@ def list_buckets(**kwargs):
 
 @ls.command('bucket')
 @click.argument('bucket_name')
-@click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
+@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket_name, **kwargs):
     """Lists objects in an S3 bucket [options]"""
     client = S3Client(**kwargs)
@@ -49,7 +49,7 @@ def list_bucket_objects(bucket_name, **kwargs):
 @cli.command('sync')
 @click.argument('path', type=click.Path(exists=True))
 @click.argument('bucket')
-@click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
+@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile to use as credentials.')
 def sync(path, bucket, **kwargs):
     """Command for syncing contents of PATH recursively to S3 BUCKET"""
     client = S3Client(**kwargs)
@@ -68,8 +68,8 @@ def setup():
 
 @setup.command('bucket')
 @click.argument('bucket_name')
-@click.option('--region', default=None, help='Specify the AWS region to create the bucket.')
-@click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
+@click.option('--region', 'region_name', default=None, help='Specify the AWS region to create the bucket.')
+@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
     """Setup S3 bucket for website hosting [options]"""
     client = S3Client(**kwargs)
