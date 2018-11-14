@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # clean-up step
 rm -rf build dist pyjam.egg-info
 pip3 uninstall pyjam -y
