@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import boto3
-
 from botocore.exceptions import ClientError
 from pyjam.core.s3 import (
     create_bucket,
