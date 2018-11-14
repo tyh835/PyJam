@@ -14,11 +14,7 @@ Run `pipenv install` in the file directory.
 
 If you don't yet have `pipenv`, install at [https://pipenv.readthedocs.io/en/latest/](https://pipenv.readthedocs.io/en/latest/)
 
-Use the standard configuration on the AWS CLI. e.g.
-
-`aws configure`
-
-and add your Access and Secret keys.
+Use the standard configuration on the AWS CLI. e.g. `aws configure` and add your Access and Secret keys.
 
 The profile should be an AWS power user (more restrictive permissions pending).
 
@@ -29,3 +25,5 @@ The profile should be an AWS power user (more restrictive permissions pending).
 `jam list bucket <name>` - Lists all objects in an S3 bucket
 
 `jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Configures the bucket if it already exists.
+
+`jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket
