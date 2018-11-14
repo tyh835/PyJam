@@ -1,11 +1,6 @@
 import click
 from pyjam.constants import version
-from pyjam.clients import set_s3client
-from pyjam.utils.bucket import (
-    print_objects,
-    setup_hosting_bucket,
-    sync_to_bucket
-)
+from pyjam.clients import S3Client
 
 
 @click.group()
@@ -27,30 +22,25 @@ def cli():
 
 @cli.group('list')
 def ls():
-    """Command for listing buckets and objects"""
+    """Command for listing S3 buckets and objects"""
     pass
 
 
 @ls.command('buckets')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_buckets(**kwargs):
-    """List all S3 buckets [options]"""
-    s3, _ = set_s3client(**kwargs)
-
-    for bucket in s3.buckets.all():
-        print('s3://' + bucket.name)
-
-    return
+    """Lists all S3 buckets [options]"""
+    client = S3Client(**kwargs)
+    return client.print_buckets()
 
 
 @ls.command('bucket')
 @click.argument('bucket_name')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket_name, **kwargs):
-    """List objects in an S3 bucket [options]"""
-    s3, _ = set_s3client(**kwargs)
-
-    return print_objects(s3, bucket_name)
+    """Lists objects in an S3 bucket [options]"""
+    client = S3Client(**kwargs)
+    return client.print_objects(bucket_name)
 
 
 """
@@ -60,17 +50,13 @@ def list_bucket_objects(bucket_name, **kwargs):
 """
 
 @cli.command('sync')
-@click.argument('path_name', type=click.Path(exists=True))
-@click.argument('bucket_name')
+@click.argument('path', type=click.Path(exists=True))
+@click.argument('bucket')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
-def sync(path_name, bucket_name, **kwargs):
-    """Sync contents of PATH to BUCKET"""
-    s3, _ = set_s3client(**kwargs)
-
-    sync_to_bucket(s3, bucket_name, path_name)
-
-    return
-
+def sync(path, bucket, **kwargs):
+    """Command for syncing contents of PATH recursively to S3 BUCKET"""
+    client = S3Client(**kwargs)
+    return client.sync_to_bucket(path, bucket)
 
 
 """
@@ -91,10 +77,8 @@ def setup():
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
     """Setup S3 bucket for website hosting [options]"""
-    s3, session = set_s3client(**kwargs)
-    region = session.region_name
-
-    return setup_hosting_bucket(s3, region, bucket_name)
+    client = S3Client(**kwargs)
+    return client.setup_hosting_bucket(bucket_name)
 
 
 if __name__ == '__main__':

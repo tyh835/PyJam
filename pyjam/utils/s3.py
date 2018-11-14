@@ -1,61 +1,9 @@
 import mimetypes
-from pathlib import Path
 from botocore.exceptions import ClientError
 
 
-def print_objects(s3, bucket_name):
-    """
-    Arguments:
-        s3: s3.ServiceResource -- Instance of S3 ServiceResource
-        bucket_name: str -- Name of the S3 bucket to list
-    """
-
-    try:
-        for obj in s3.Bucket(bucket_name).objects.all():
-            print(obj.key)
-
-    except ClientError as err:
-        print('Unable to list bucket: {0}. '.format(bucket_name) + str(err) + '\n')
-
-    return
-
-
-"""
-***
-*** Bucket Setup functions
-***
-"""
-
-def setup_hosting_bucket(s3, region, bucket_name):
-    """
-    Arguments:
-        s3: s3.ServiceResource -- Instance of S3 ServiceResource
-        region: str -- AWS region in which to setup the bucket
-        bucket_name: str -- Name of the S3 bucket to setup
-    """
-
-    try:
-        bucket = create_bucket(s3, region, bucket_name)
-        set_bucket_policy(bucket)
-        set_website_config(bucket)
-        print('\nSuccess!')
-
-    except ClientError:
-        print('\nFailed to setup bucket {0}. '.format(bucket_name))
-
-    return
-
-
 def create_bucket(s3, region, bucket_name):
-    """
-    Arguments:
-        s3: s3.ServiceResource -- Instance of S3 ServiceResource
-        region: str -- AWS region in which to setup the bucket
-        bucket_name: str -- Name of the S3 bucket to create
-
-    Returns:
-        s3.Bucket -- Instance of S3 Bucket just created
-    """
+    """Creates new S3 bucket in given region"""
 
     try:
         if region == 'us-east-1':
@@ -79,13 +27,7 @@ def create_bucket(s3, region, bucket_name):
 
 
 def set_bucket_policy(bucket):
-    """
-    Arguments:
-        bucket: s3.Bucket -- Instance of S3 Bucket
-
-    Returns:
-        Response -- HTTP Response of setting bucket policy
-    """
+    """Configures bucket policy to allow public reads"""
 
     policy = '''
     {
@@ -114,13 +56,8 @@ def set_bucket_policy(bucket):
 
 
 def set_website_config(bucket):
-    """
-    Arguments:
-        bucket: s3.Bucket -- Instance of S3 Bucket
+    """Configures bucket for static site hosting"""
 
-    Returns:
-        Response -- HTTP Response of setting website configuration
-    """
     try:
         print('Applying static site configurations to {0}...'.format(bucket.name))
         return bucket.Website().put(WebsiteConfiguration={
@@ -137,29 +74,9 @@ def set_website_config(bucket):
         raise err
 
 
-"""
-***
-*** Sync functions
-***
-"""
-
-def sync_to_bucket(s3, bucket_name, path):
-    bucket = s3.Bucket(bucket_name)
-    root = Path(path).expanduser().resolve()
-
-    try:
-        print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
-        delete_objects(bucket)
-        upload_objects(bucket, root)
-        print('\nSuccess!')
-
-    except ClientError:
-        print('\nFailed to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
-
-    return
-
-
 def delete_objects(bucket):
+    """Deletes all object in bucket"""
+
     try:
         for obj in bucket.objects.all():
             print('Deleting {0} from {1}.'.format(obj.key, bucket.name))
@@ -167,27 +84,30 @@ def delete_objects(bucket):
 
     except ClientError as err:
         print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
-        raise err
 
     return
 
 
-def upload_objects(bucket, root):
-        for path in root.iterdir():
-            if path.is_dir():
-                upload_objects(bucket, path)
+def recursive_upload(bucket, root_path):
+    """Uploads files recursively from root path to S3 bucket"""
 
-            if path.is_file():
-                upload(bucket, str(path), str(path.relative_to(root)))
+    for path in root_path.iterdir():
+        if path.is_dir():
+            recursive_upload(bucket, path)
+
+        if path.is_file():
+            upload_file(bucket, str(path), str(path.relative_to(root_path)))
 
 
-def upload(bucket, path, key):
+def upload_file(bucket, file_path, key):
+    """Uploads file to S3 bucket"""
+
     content_type = mimetypes.guess_type(key)[0] or 'text/plain'
 
     try:
         print('Uploading {0} to {1} (content-type: {2}).'.format(key, bucket.name, content_type))
         bucket.upload_file(
-            path,
+            file_path,
             key,
             ExtraArgs={
                 'ContentType': content_type
@@ -195,7 +115,5 @@ def upload(bucket, path, key):
         )
 
     except ClientError as err:
-        print('Unable to upload file: {0} to {1}. '.format(key, bucket.name) + str(err) + '\n')
+        print('Unable to upload file: {0} to {1}. '.format(file_path, bucket.name) + str(err) + '\n')
         raise err
-
-    return
