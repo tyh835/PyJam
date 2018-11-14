@@ -1,7 +1,6 @@
 import mimetypes
 from botocore.exceptions import ClientError
 
-
 def create_bucket(s3, region, bucket_name):
     """Creates new S3 bucket in given region"""
     try:
@@ -12,7 +11,9 @@ def create_bucket(s3, region, bucket_name):
             print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
             return s3.create_bucket(
                 Bucket=bucket_name,
-                CreateBucketConfiguration={'LocationConstraint': region}
+                CreateBucketConfiguration={
+                    'LocationConstraint': region
+                }
             )
 
     except ClientError as err:

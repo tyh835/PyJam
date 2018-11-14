@@ -9,7 +9,6 @@ from pyjam.core.s3 import (
     upload_file
 )
 
-
 class S3Client:
     """Class for S3 Client"""
 

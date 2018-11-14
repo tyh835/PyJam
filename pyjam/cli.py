@@ -2,7 +2,6 @@ import click
 from pyjam.constants import version
 from pyjam.clients import S3Client
 
-
 @click.group()
 @click.version_option(version=version)
 def cli():
