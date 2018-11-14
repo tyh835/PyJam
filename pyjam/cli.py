@@ -3,7 +3,8 @@ from pyjam.constants import version
 from pyjam.clients import set_s3client
 from pyjam.utils.bucket import (
     print_objects,
-    setup_hosting_bucket
+    setup_hosting_bucket,
+    sync_to_bucket
 )
 
 
@@ -54,7 +55,27 @@ def list_bucket_objects(bucket_name, **kwargs):
 
 """
 ***
-*** PyJam list commands
+*** PyJam sync command
+***
+"""
+
+@cli.command('sync')
+@click.argument('pathname', type=click.Path(exists=True))
+@click.argument('bucket_name')
+@click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
+def sync(path, bucket_name, **kwargs):
+    """Sync contents of PATHNAME to BUCKET"""
+    s3, _ = set_s3client(**kwargs)
+
+    sync_to_bucket(s3, path, bucket_name)
+
+    return
+
+
+
+"""
+***
+*** PyJam setup commands
 ***
 """
 
