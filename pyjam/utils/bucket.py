@@ -1,5 +1,6 @@
 from botocore.exceptions import ClientError
 
+
 def print_objects(s3, bucket):
     try:
         for obj in s3.Bucket(bucket).objects.all():
@@ -11,21 +12,56 @@ def print_objects(s3, bucket):
     return
 
 
-def create_bucket(s3, session, bucket):
+def create_bucket(s3, region, bucket_name):
     try:
-        if session.region_name == 'us-east-1':
-            s3_bucket = s3.create_bucket(Bucket=bucket)
+        if region == 'us-east-1':
+            print(' Creating S3 bucket {0}.'.format(bucket_name))
+            return s3.create_bucket(Bucket=bucket_name)
         else:
-            s3_bucket = s3.create_bucket(
-            Bucket=bucket,
-            CreateBucketConfiguration={'LocationConstraint': session.region_name})
-
-        return s3_bucket
+            print(' Creating S3 bucket {0}.'.format(bucket_name))
+            return s3.create_bucket(
+                Bucket=bucket_name,
+                CreateBucketConfiguration={'LocationConstraint': region}
+            )
 
     except ClientError as err:
         if err.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
-            s3_bucket = s3.Bucket(bucket)
+            print(' {0} already exists. Continuing...'.format(bucket_name))
+            return s3.Bucket(bucket_name)
 
-            return s3_bucket
         else:
-            raise err
+            print('Unable to create bucket: {0}. '.format(bucket_name) + str(err))
+
+
+def set_bucket_policy(bucket):
+    policy = '''
+    {
+        "Version":"2012-10-17",
+        "Statement":[
+            {
+                "Sid":"PublicReadGetObject",
+                "Effect":"Allow",
+                "Principal": "*",
+                "Action":["s3:GetObject"],
+                "Resource":["arn:aws:s3:::%s/*"]
+            }
+        ]
+    }
+    ''' % bucket.name
+
+    policy = policy.strip()
+
+    print(' Applying public read permissions to {0}...'.format(bucket.name))
+    return bucket.Policy().put(Policy=policy)
+
+
+def set_website_config(bucket):
+    print(' Applying static site configurations to {0}...'.format(bucket.name))
+    return bucket.Website().put(WebsiteConfiguration={
+        "ErrorDocument": {
+            "Key": "error.html"
+        },
+        "IndexDocument": {
+            "Suffix": "index.html"
+        }
+    })
