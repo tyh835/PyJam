@@ -1,5 +1,4 @@
 import click
-from botocore.exceptions import ClientError
 from pyjam.constants import version
 from pyjam.clients import set_s3client
 from pyjam.utils.bucket import (
