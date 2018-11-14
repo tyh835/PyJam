@@ -1,4 +1,5 @@
 import click
+from botocore.exceptions import ClientError
 from pyjam.constants import version
 from pyjam.clients import set_s3client
 from pyjam.utils.bucket import (
@@ -75,10 +76,14 @@ def setup_bucket(bucket_name, **kwargs):
     s3, session = set_s3client(**kwargs)
     region = session.region_name
 
-    bucket = create_bucket(s3, region, bucket_name)
-    set_bucket_policy(bucket)
-    set_website_config(bucket)
-    print('Success!')
+    try:
+        bucket = create_bucket(s3, region, bucket_name)
+        set_bucket_policy(bucket)
+        set_website_config(bucket)
+        print('Success!')
+
+    except ClientError as err:
+        print('Failed to setup bucket {0}. '.format(bucket_name) + str(err))
 
     return
 

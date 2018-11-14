@@ -30,7 +30,7 @@ def create_bucket(s3, region, bucket_name):
             return s3.Bucket(bucket_name)
 
         else:
-            print('Unable to create bucket: {0}. '.format(bucket_name) + str(err))
+            print(' Unable to create bucket: {0}. '.format(bucket_name) + str(err))
             raise(err)
 
 
@@ -57,7 +57,7 @@ def set_bucket_policy(bucket):
         return bucket.Policy().put(Policy=policy)
 
     except ClientError as err:
-        print('Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err))
+        print(' Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err))
         raise err
 
 
@@ -75,5 +75,5 @@ def set_website_config(bucket):
         })
 
     except ClientError as err:
-        print('Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err))
+        print(' Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err))
         raise err
