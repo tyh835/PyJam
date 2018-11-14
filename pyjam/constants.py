@@ -1,1 +1,3 @@
-version = '0.1.4'
+"""Constants for PyJam"""
+
+VERSION = '0.1.4'

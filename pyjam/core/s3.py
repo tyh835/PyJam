@@ -1,3 +1,5 @@
+"""Core S3 functionalities for PyJam"""
+
 import mimetypes
 from botocore.exceptions import ClientError
 

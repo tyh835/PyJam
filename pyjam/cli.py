@@ -1,9 +1,11 @@
+"""Cli entrypoint for PyJam"""
+
 import click
-from pyjam.constants import version
+from pyjam.constants import VERSION
 from pyjam.clients import S3Client
 
 @click.group()
-@click.version_option(version=version)
+@click.version_option(version=VERSION)
 def cli():
     """
     PyJam deploys static sites to S3 and configures Route53 and CloudFront

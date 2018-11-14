@@ -1,3 +1,5 @@
+"""Client classes for PyJam"""
+
 from pathlib import Path
 
 import boto3
