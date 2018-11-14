@@ -1,5 +1,7 @@
-import boto3
 from pathlib import Path
+
+import boto3
+
 from botocore.exceptions import ClientError
 from pyjam.core.s3 import (
     create_bucket,
@@ -12,7 +14,7 @@ from pyjam.core.s3 import (
 class S3Client:
     """Class for S3 Client"""
 
-    def __init__(self, profile=None, region=None, **kwargs):
+    def __init__(self, profile=None, region=None):
         """Setup session and s3 ServiceResource"""
         self.session = boto3.Session(profile_name=profile) if profile else boto3.Session()
         self.s3 = self.session.resource('s3')

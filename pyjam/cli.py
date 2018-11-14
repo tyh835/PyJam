@@ -12,12 +12,10 @@ def cli():
     """
     pass
 
+###
+### PyJam list commands
+###
 
-"""
-***
-*** PyJam list commands
-***
-"""
 
 @cli.group('list')
 def ls():
@@ -42,11 +40,9 @@ def list_bucket_objects(bucket_name, **kwargs):
     return client.print_objects(bucket_name)
 
 
-"""
-***
-*** PyJam sync command
-***
-"""
+###
+### PyJam sync command
+###
 
 @cli.command('sync')
 @click.argument('path', type=click.Path(exists=True))
@@ -57,12 +53,10 @@ def sync(path, bucket, **kwargs):
     client = S3Client(**kwargs)
     return client.sync_to_bucket(path, bucket)
 
+###
+### PyJam setup commands
+###
 
-"""
-***
-*** PyJam setup commands
-***
-"""
 
 @cli.group('setup')
 def setup():

@@ -7,23 +7,22 @@ def create_bucket(s3, region, bucket_name):
         if region == 'us-east-1':
             print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
             return s3.create_bucket(Bucket=bucket_name)
-        else:
-            print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
-            return s3.create_bucket(
-                Bucket=bucket_name,
-                CreateBucketConfiguration={
-                    'LocationConstraint': region
-                }
-            )
+
+        print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
+        return s3.create_bucket(
+            Bucket=bucket_name,
+            CreateBucketConfiguration={
+                'LocationConstraint': region
+            }
+        )
 
     except ClientError as err:
         if err.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
             print('{0} already exists. Continuing...'.format(bucket_name))
             return s3.Bucket(bucket_name)
 
-        else:
-            print('Unable to create bucket: {0}.'.format(bucket_name) + str(err))
-            raise err
+        print('Unable to create bucket: {0}.'.format(bucket_name) + str(err))
+        raise err
 
 
 def set_bucket_policy(bucket):
@@ -98,5 +97,5 @@ def upload_file(bucket, file_path, key):
         )
 
     except ClientError as err:
-        print('Unable to upload file: {0} to {1}. '.format(file_path, bucket.name) + str(err) + '\n')
+        print('Unable to upload file: {0} to {1}. '.format(file_path, bucket.name) + str(err))
         raise err
