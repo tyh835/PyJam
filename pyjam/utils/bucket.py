@@ -143,29 +143,59 @@ def set_website_config(bucket):
 ***
 """
 
-def sync_to_bucket(s3, path, bucket_name):
+def sync_to_bucket(s3, bucket_name, path):
     bucket = s3.Bucket(bucket_name)
     root = Path(path).expanduser().resolve()
 
-    def recursive_upload(target_path):
-        for path in target_path.iterdir():
-            if path.is_dir():
-                recursive_upload(path)
+    try:
+        print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
+        delete_objects(bucket)
+        upload_objects(bucket, root)
+        print('\nSuccess!')
 
-            else:
-                upload_file(bucket, str(path), str(path.relative_to(root)))
+    except ClientError:
+        print('\nFailed to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
 
     return
 
 
-def upload_file(bucket, path, key):
+def delete_objects(bucket):
+    try:
+        for obj in bucket.objects.all():
+            print('Deleting {0} from {1}.'.format(obj.key, bucket.name))
+            obj.delete()
+
+    except ClientError as err:
+        print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
+        raise err
+
+    return
+
+
+def upload_objects(bucket, root):
+        for path in root.iterdir():
+            if path.is_dir():
+                upload_objects(bucket, path)
+
+            if path.is_file():
+                upload(bucket, str(path), str(path.relative_to(root)))
+
+
+def upload(bucket, path, key):
     content_type = mimetypes.guess_type(key)[0] or 'text/plain'
 
-    bucket.upload_file(
-        path,
-        key,
-        ExtraArgs={
-            'ContentType': content_type
-        })
+    try:
+        print('Uploading {0} to {1} (content-type: {2}).'.format(key, bucket.name, content_type))
+        bucket.upload_file(
+            path,
+            key,
+            ExtraArgs={
+                'ContentType': content_type
+            }
+        )
+
+    except ClientError as err:
+        print('Unable to upload file: {0} to {1}. '.format(key, bucket.name) + str(err) + '\n')
+        raise err
 
     return
