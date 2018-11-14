@@ -3,7 +3,7 @@ from pyjam.constants import version
 from pyjam.clients import set_s3client
 from pyjam.utils.bucket import (
     print_objects,
-    setup_s3_bucket
+    setup_hosting_bucket
 )
 
 
@@ -46,7 +46,7 @@ def list_buckets(**kwargs):
 @click.argument('bucket_name')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket_name, **kwargs):
-    """List objects in an S3 bucket <NAME> [options]"""
+    """List objects in an S3 bucket [options]"""
     s3, _ = set_s3client(**kwargs)
 
     return print_objects(s3, bucket_name)
@@ -66,12 +66,14 @@ def setup():
 
 @setup.command('bucket')
 @click.argument('bucket_name')
+@click.option('--region', default=None, help='Specify the AWS region to create the bucket.')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
+    """Setup S3 bucket for website hosting [options]"""
     s3, session = set_s3client(**kwargs)
     region = session.region_name
 
-    return setup_s3_bucket(s3, region, bucket_name)
+    return setup_hosting_bucket(s3, region, bucket_name)
 
 
 if __name__ == '__main__':
