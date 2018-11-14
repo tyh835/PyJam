@@ -15,10 +15,10 @@ def print_objects(s3, bucket):
 def create_bucket(s3, region, bucket_name):
     try:
         if region == 'us-east-1':
-            print(' Creating S3 bucket {0}.'.format(bucket_name))
+            print('\nCreating S3 bucket {0}.'.format(bucket_name))
             return s3.create_bucket(Bucket=bucket_name)
         else:
-            print(' Creating S3 bucket {0}.'.format(bucket_name))
+            print('\nCreating S3 bucket {0}.'.format(bucket_name))
             return s3.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={'LocationConstraint': region}
@@ -31,6 +31,7 @@ def create_bucket(s3, region, bucket_name):
 
         else:
             print('Unable to create bucket: {0}. '.format(bucket_name) + str(err))
+            raise(err)
 
 
 def set_bucket_policy(bucket):
@@ -51,17 +52,28 @@ def set_bucket_policy(bucket):
 
     policy = policy.strip()
 
-    print(' Applying public read permissions to {0}...'.format(bucket.name))
-    return bucket.Policy().put(Policy=policy)
+    try:
+        print(' Applying public read permissions to {0}...'.format(bucket.name))
+        return bucket.Policy().put(Policy=policy)
+
+    except ClientError as err:
+        print('Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err))
+        raise err
 
 
 def set_website_config(bucket):
-    print(' Applying static site configurations to {0}...'.format(bucket.name))
-    return bucket.Website().put(WebsiteConfiguration={
-        "ErrorDocument": {
-            "Key": "error.html"
-        },
-        "IndexDocument": {
-            "Suffix": "index.html"
-        }
-    })
+
+    try:
+        print(' Applying static site configurations to {0}...'.format(bucket.name))
+        return bucket.Website().put(WebsiteConfiguration={
+            "ErrorDocument": {
+                "Key": "error.html"
+            },
+            "IndexDocument": {
+                "Suffix": "index.html"
+            }
+        })
+
+    except ClientError as err:
+        print('Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err))
+        raise err

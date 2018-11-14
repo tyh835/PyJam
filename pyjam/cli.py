@@ -1,6 +1,6 @@
 import click
 from pyjam.constants import version
-from pyjam.client import set_s3client
+from pyjam.clients import set_s3client
 from pyjam.utils.bucket import (
     print_objects,
     create_bucket,
@@ -45,7 +45,7 @@ def list_buckets(**kwargs):
 
 
 @ls.command('bucket')
-@click.argument('name', 'bucket_name')
+@click.argument('bucket_name')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket_name, **kwargs):
     """List objects in an S3 bucket <NAME> [options]"""
@@ -69,7 +69,7 @@ def setup():
 
 
 @setup.command('bucket')
-@click.argument('name', 'bucket_name')
+@click.argument('bucket_name')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
     s3, session = set_s3client(**kwargs)
@@ -78,8 +78,8 @@ def setup_bucket(bucket_name, **kwargs):
     bucket = create_bucket(s3, region, bucket_name)
     set_bucket_policy(bucket)
     set_website_config(bucket)
-
     print('Success!')
+
     return
 
 

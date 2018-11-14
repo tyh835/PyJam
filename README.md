@@ -1,6 +1,6 @@
 # PyJam
 
-Version: 0.1.1
+Version: 0.1.2
 
 ## About
 
@@ -27,3 +27,5 @@ The profile should be an AWS power user (more restrictive permissions pending).
 `jam list buckets` - Lists all S3 buckets
 
 `jam list bucket <name>` - Lists all objects in an S3 bucket
+
+`jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting
