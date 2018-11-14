@@ -1,7 +1,7 @@
 import boto3
 from pathlib import Path
 from botocore.exceptions import ClientError
-from pyjam.utils.s3 import (
+from pyjam.core.s3 import (
     create_bucket,
     set_bucket_policy,
     set_website_config,
