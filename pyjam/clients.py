@@ -17,9 +17,15 @@ class S3Client:
 
     def __init__(self, profile=None, region=None):
         """Setup session and s3 ServiceResource"""
-        self.session = boto3.Session(profile_name=profile) if profile else boto3.Session()
+        if profile and region:
+            self.session = boto3.Session(profile_name=profile, region_name=region)
+        elif profile:
+            self.session = boto3.Session(profile_name=profile)
+        elif region:
+            self.session = boto3.Session(region_name=region)
+        else:
+            self.session = boto3.Session()
         self.s3 = self.session.resource('s3')
-        self.region = region or self.session.region_name
 
 
     def print_buckets(self):
@@ -42,7 +48,7 @@ class S3Client:
     def setup_hosting_bucket(self, bucket_name):
         """Setup S3 bucket for website hosting"""
         try:
-            bucket = create_bucket(self.s3, self.region, bucket_name)
+            bucket = create_bucket(self.s3, self.session.region_name, bucket_name)
             set_bucket_policy(bucket)
             set_website_config(bucket)
             print('\nSuccess!')
