@@ -1,6 +1,6 @@
 # PyJam
 
-Version: 0.1.2
+Version: 0.1.3
 
 ## About
 
@@ -26,4 +26,4 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Configures the bucket if it already exists.
 
-`jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket
+`jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes previous files.
