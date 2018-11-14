@@ -6,7 +6,7 @@ from pyjam.utils.s3 import (
     set_bucket_policy,
     set_website_config,
     delete_objects,
-    recursive_upload
+    upload_file
 )
 
 
@@ -29,7 +29,6 @@ class S3Client:
 
     def print_objects(self, bucket_name):
         """Lists all objects in the given bucket"""
-
         try:
             for obj in self.s3.Bucket(bucket_name).objects.all():
                 print(obj.key)
@@ -40,7 +39,6 @@ class S3Client:
 
     def setup_hosting_bucket(self, bucket_name):
         """Setup S3 bucket for website hosting"""
-
         try:
             bucket = create_bucket(self.s3, self.region, bucket_name)
             set_bucket_policy(bucket)
@@ -53,9 +51,17 @@ class S3Client:
 
     def sync_to_bucket(self, path, bucket_name):
         """Sync path recursively to the given bucket"""
-
         bucket = self.s3.Bucket(bucket_name)
         root_path = Path(path).expanduser().resolve()
+
+        def recursive_upload(bucket, target_path):
+            """Uploads files recursively from root path to S3 bucket"""
+            for path in target_path.iterdir():
+                if path.is_dir():
+                    recursive_upload(bucket, path)
+
+                if path.is_file():
+                    upload_file(bucket, str(path), str(path.relative_to(root_path)))
 
         try:
             print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
