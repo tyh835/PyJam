@@ -25,6 +25,7 @@ class S3Client:
             self.session = boto3.Session(region_name=region)
         else:
             self.session = boto3.Session()
+
         self.s3 = self.session.resource('s3')
 
 
