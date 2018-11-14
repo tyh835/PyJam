@@ -60,14 +60,14 @@ def list_bucket_objects(bucket_name, **kwargs):
 """
 
 @cli.command('sync')
-@click.argument('path', type=click.Path(exists=True))
+@click.argument('path_name', type=click.Path(exists=True))
 @click.argument('bucket_name')
 @click.option('--profile', default=None, help='Specify the AWS profile to use as credentials.')
-def sync(path, bucket_name, **kwargs):
+def sync(path_name, bucket_name, **kwargs):
     """Sync contents of PATHNAME to BUCKET"""
     s3, _ = set_s3client(**kwargs)
 
-    sync_to_bucket(s3, bucket_name, path)
+    sync_to_bucket(s3, bucket_name, path_name)
 
     return
 
