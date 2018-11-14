@@ -23,7 +23,7 @@ def create_bucket(s3, region, bucket_name):
 
         else:
             print('Unable to create bucket: {0}.'.format(bucket_name) + str(err))
-            raise
+            raise err
 
 
 def set_bucket_policy(bucket):
@@ -84,8 +84,6 @@ def delete_objects(bucket):
 
     except ClientError as err:
         print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
-
-    return
 
 
 def recursive_upload(bucket, root_path):

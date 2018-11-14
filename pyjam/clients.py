@@ -50,9 +50,6 @@ class S3Client:
         except ClientError:
             print('\nFailed to setup bucket {0}. '.format(bucket_name))
 
-        return
-
-
 
     def sync_to_bucket(self, path, bucket_name):
         """Sync path recursively to the given bucket"""
