@@ -158,7 +158,7 @@ class S3Client:
         checksum = generate_checksum(path)
 
         if self.checksums.get(key, '') == checksum:
-            print('Skipping {0}... checksums match.).'.format(key))
+            print('Skipping {0}... checksums match'.format(key))
             return checksum
 
         try:
