@@ -1,9 +1,7 @@
 """Utility functions for S3Client"""
 
-import mimetypes
 from collections import namedtuple
 from botocore.exceptions import ClientError
-from pyjam.utils.checksum import generate_checksum
 
 
 Endpoint = namedtuple('Endpoint', ['host', 'zone'])
@@ -92,29 +90,3 @@ def delete_objects(bucket, old_checksums, new_checksums):
 
     except ClientError as err:
         print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
-
-
-def upload_file(bucket, old_checksums, path, key, transfer_config):
-    """Uploads file to S3 bucket"""
-    content_type = mimetypes.guess_type(key)[0] or 'text/plain'
-    checksum = generate_checksum(path)
-
-    if old_checksums.get(key, '') == checksum:
-        return checksum
-
-    try:
-        print('Uploading {0} to {1} (content-type: {2}).'.format(key, bucket.name, content_type))
-        bucket.upload_file(
-            path,
-            key,
-            ExtraArgs={
-                'ContentType': content_type
-            },
-            Config=transfer_config
-        )
-
-        return checksum
-
-    except ClientError as err:
-        print('Unable to upload file: {0} to {1}. '.format(path, bucket.name) + str(err))
-        raise err

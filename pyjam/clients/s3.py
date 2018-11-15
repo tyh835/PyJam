@@ -1,5 +1,6 @@
 """S3 Client for PyJam"""
 
+import mimetypes
 from pathlib import Path
 import boto3
 from botocore.exceptions import ClientError
@@ -7,10 +8,10 @@ from pyjam.utils.s3 import (
     set_bucket_policy,
     set_website_config,
     delete_objects,
-    upload_file,
     get_endpoint
 )
 from pyjam.constants import CHUNK_SIZE
+from pyjam.utils.checksum import generate_checksum
 
 
 class S3Client:
@@ -21,6 +22,7 @@ class S3Client:
 
         self.session = boto3.Session(**params)
         self.s3 = self.session.resource('s3')
+        self.checksums = {}
 
 
     def get_bucket(self, bucket_name):
@@ -114,6 +116,7 @@ class S3Client:
 
     def sync_to_bucket(self, path, bucket_name):
         """Sync path recursively to the given bucket"""
+        self.checksums = self.load_checksums(bucket_name)
         bucket = self.s3.Bucket(bucket_name)
         root_path = Path(path).expanduser().resolve()
         transfer_config = boto3.s3.transfer.TransferConfig(
@@ -121,7 +124,6 @@ class S3Client:
             multipart_threshold=CHUNK_SIZE
         )
 
-        old_checksums = self.load_checksums(bucket_name)
         new_checksums = {}
 
         def recursive_upload(bucket, target_path):
@@ -135,9 +137,8 @@ class S3Client:
                     key = str(path.relative_to(root_path))
                     path = str(path)
 
-                    etag = upload_file(
+                    etag = self.upload_file(
                         bucket,
-                        old_checksums,
                         path,
                         key,
                         transfer_config
@@ -148,8 +149,38 @@ class S3Client:
         try:
             print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
             recursive_upload(bucket, root_path)
-            delete_objects(bucket, old_checksums, new_checksums)
+            delete_objects(bucket, self.checksums, new_checksums)
             print('\nSuccess!')
 
         except ClientError:
             print('\nFailed to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
+
+
+    def upload_file(self, bucket, path, key, transfer_config):
+        """Uploads file to S3 bucket"""
+        content_type = mimetypes.guess_type(key)[0] or 'text/plain'
+        checksum = generate_checksum(path)
+
+        if self.checksums.get(key, '') == checksum:
+            return checksum
+
+        try:
+            print('Uploading {0} to {1} (content-type: {2}).'.format(
+                key,
+                bucket.name,
+                content_type
+            ))
+            bucket.upload_file(
+                path,
+                key,
+                ExtraArgs={
+                    'ContentType': content_type
+                },
+                Config=transfer_config
+            )
+
+            return checksum
+
+        except ClientError as err:
+            print('Unable to upload file: {0} to {1}. '.format(path, bucket.name) + str(err))
+            raise err
