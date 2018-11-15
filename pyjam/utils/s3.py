@@ -1,4 +1,4 @@
-"""Core S3 functionalities for PyJam"""
+"""Utility functions for S3Client"""
 
 import mimetypes
 from collections import namedtuple
@@ -90,7 +90,7 @@ def delete_objects(bucket):
         print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
 
 
-def upload_file(bucket, file_path, key):
+def upload_file(bucket, file_path, key, transfer_config):
     """Uploads file to S3 bucket"""
     content_type = mimetypes.guess_type(key)[0] or 'text/plain'
 
@@ -101,7 +101,8 @@ def upload_file(bucket, file_path, key):
             key,
             ExtraArgs={
                 'ContentType': content_type
-            }
+            },
+            Config=transfer_config
         )
 
     except ClientError as err:
