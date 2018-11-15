@@ -10,7 +10,6 @@ from pyjam.utils.s3 import (
     upload_file,
     get_endpoint
 )
-from pyjam.utils.checksum import generate_checksum
 from pyjam.constants import CHUNK_SIZE
 
 
