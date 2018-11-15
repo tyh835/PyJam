@@ -12,8 +12,9 @@ from pyjam.constants import CHUNK_SIZE
 
 class S3Client:
     """Class for S3 Client"""
+
     def __init__(self, **kwargs):
-        """Setup session and s3 ServiceResource"""
+        """Setup S3 Client Configurations"""
         params = {k:v for k, v in kwargs.items() if v is not None}
 
         self.session = boto3.Session(**params)
@@ -140,7 +141,7 @@ class S3Client:
             print('\nSuccess!')
 
         except ClientError:
-            print('\nFailed to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
+            print('\nUnable to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
 
 
     def upload_file(self, bucket, path, key):
