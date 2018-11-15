@@ -3,7 +3,6 @@
 import uuid
 import boto3
 from botocore.exceptions import ClientError
-
 from pyjam.utils.s3 import set_bucket_policy, set_website_config
 
 
