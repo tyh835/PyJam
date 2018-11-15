@@ -8,6 +8,8 @@ Version: 0.1.6
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
+This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project, which you can find here: [https://github.com/ACloudGuru/automating-aws-with-python/](https://github.com/ACloudGuru/automating-aws-with-python/)
+
 ## Configuring for Development
 
 Run `pipenv install` in the file directory.
@@ -27,6 +29,12 @@ The profile should be an AWS power user (more restrictive permissions pending).
 `jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Configures the bucket if it already exists.
 
 `jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes previous files.
+
+## Options
+
+`--region` specifies the AWS region of the resources.
+
+`--profile` specifies the AWS profile to use as credentials.
 
 ## Installation
 
