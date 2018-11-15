@@ -36,9 +36,9 @@ You can build from source by cloning the this git repository:
 
 and build by running `cd pyjam && pipenv install` and `pipenv run python setup.py bdist_wheel`.
 
-Then, install the binary using `pip3 install dist/<wheel-file-name-here>.whl`
+Then, install the package using `pip3 install dist/<wheel-file-name-here>.whl`
 
-Or, you can install the binary directly at:
+Or, you can install the package directly at:
 
 `pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.1.5-py3-none-any`
 

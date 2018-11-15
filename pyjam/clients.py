@@ -14,7 +14,6 @@ from pyjam.core.s3 import (
 
 class S3Client:
     """Class for S3 Client"""
-
     def __init__(self, **kwargs):
         """Setup session and s3 ServiceResource"""
         params = { key: value for key, value in kwargs.items() if value is not None }
