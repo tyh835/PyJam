@@ -27,17 +27,22 @@ class S3Client:
         return self.s3.Bucket(bucket_name)
 
 
-    def get_region_name(self, bucket_name):
+    def get_bucket_region(self, bucket_name):
         """Get the bucket's region name."""
-        bucket_location = self.s3.meta.client.get_bucket_location(Bucket=bucket_name.name)
+        bucket_location = self.s3.meta.client.get_bucket_location(Bucket=bucket_name)
         return bucket_location["LocationConstraint"] or 'us-east-1'
 
 
-    def get_bucket_url(self, bucket):
+    def get_bucket_endpoint(self, bucket_name):
+        """Get the S3 endpoints for this bucket."""
+        return get_endpoint(self.get_bucket_region(bucket_name))
+
+
+    def get_bucket_url(self, bucket_name):
         """Get the website URL for this bucket."""
         return "http://{}.{}".format(
-            bucket.name,
-            get_endpoint(self.get_region_name(bucket)).host
+            bucket_name,
+            get_endpoint(self.get_bucket_region(bucket_name)).host
         )
 
 
@@ -88,7 +93,7 @@ class S3Client:
             bucket = self.create_bucket(bucket_name)
             set_bucket_policy(bucket)
             set_website_config(bucket)
-            print('\nSuccess! URL: {0}'.format(self.get_bucket_url(bucket)))
+            print('\nSuccess! URL: {0}'.format(self.get_bucket_url(bucket_name)))
 
         except ClientError:
             print('\nFailed to setup bucket {0}. '.format(bucket_name))
