@@ -18,7 +18,12 @@ class S3Client:
 
         self.session = boto3.Session(**params)
         self.s3 = self.session.resource('s3')
+        self.transfer_config = boto3.s3.transfer.TransferConfig(
+            multipart_chunksize=CHUNK_SIZE,
+            multipart_threshold=CHUNK_SIZE
+        )
         self.checksums = {}
+        self.new_checksums = {}
 
 
     def get_bucket(self, bucket_name):
@@ -54,7 +59,7 @@ class S3Client:
             for obj in page.get('Contents', []):
                 checksums[obj['Key']] = obj['ETag']
 
-        return checksums
+        self.checksums = checksums
 
 
     def create_bucket(self, bucket_name):
@@ -112,15 +117,10 @@ class S3Client:
 
     def sync_to_bucket(self, path, bucket_name):
         """Sync path recursively to the given bucket"""
-        self.checksums = self.load_checksums(bucket_name)
+        self.load_checksums(bucket_name)
         bucket = self.s3.Bucket(bucket_name)
         root_path = Path(path).expanduser().resolve()
-        transfer_config = boto3.s3.transfer.TransferConfig(
-            multipart_chunksize=CHUNK_SIZE,
-            multipart_threshold=CHUNK_SIZE
-        )
 
-        new_checksums = {}
 
         def recursive_upload(bucket, target_path):
             """Uploads files recursively from root path to S3 bucket"""
@@ -133,26 +133,21 @@ class S3Client:
                     key = str(path.relative_to(root_path))
                     path = str(path)
 
-                    etag = self.upload_file(
-                        bucket,
-                        path,
-                        key,
-                        transfer_config
-                    )
+                    etag = self.upload_file(bucket, path, key)
 
-                    new_checksums[key] = etag
+                    self.new_checksums[key] = etag
 
         try:
             print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
             recursive_upload(bucket, root_path)
-            self.delete_objects(bucket, new_checksums)
+            self.delete_objects(bucket)
             print('\nSuccess!')
 
         except ClientError:
             print('\nFailed to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
 
 
-    def upload_file(self, bucket, path, key, transfer_config):
+    def upload_file(self, bucket, path, key):
         """Uploads file to S3 bucket"""
         content_type = mimetypes.guess_type(key)[0] or 'text/plain'
         checksum = generate_checksum(path)
@@ -173,7 +168,7 @@ class S3Client:
                 ExtraArgs={
                     'ContentType': content_type
                 },
-                Config=transfer_config
+                Config=self.transfer_config
             )
 
             return checksum
@@ -183,13 +178,13 @@ class S3Client:
             raise err
 
 
-    def delete_objects(self, bucket, new_checksums):
+    def delete_objects(self, bucket):
         """Deletes obsolete objects in bucket based on checksum"""
         try:
             for obj in bucket.objects.all():
                 key = obj.key
 
-                if self.checksums.get(key, '') and not new_checksums.get(key, ''):
+                if self.checksums.get(key, '') and not self.new_checksums.get(key, ''):
                     print('Deleting {0} from {1}.'.format(key, bucket.name))
                     obj.delete()
 
