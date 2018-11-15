@@ -1,6 +1,6 @@
 # PyJam
 
-Version: 0.1.6
+Version: 0.1.7
 
 ## About
 
@@ -28,7 +28,7 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Configures the bucket if it already exists.
 
-`jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes previous files.
+`jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes stale files and checks for unnecessary uploads.
 
 ## Options
 
@@ -48,6 +48,6 @@ Then, install the package using `pip3 install dist/<wheel-file-name-here>.whl`
 
 Or, you can install the package directly at:
 
-`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.1.6-py3-none-any`
+`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.1.7-py3-none-any`
 
 Then, run `jam --help` and you are set!
