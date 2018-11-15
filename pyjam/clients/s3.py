@@ -4,14 +4,10 @@ import mimetypes
 from pathlib import Path
 import boto3
 from botocore.exceptions import ClientError
-from pyjam.utils.s3 import (
-    set_bucket_policy,
-    set_website_config,
-    delete_objects,
-    get_endpoint
-)
-from pyjam.constants import CHUNK_SIZE
+
+from pyjam.utils.s3 import get_endpoint, set_bucket_policy, set_website_config
 from pyjam.utils.checksum import generate_checksum
+from pyjam.constants import CHUNK_SIZE
 
 
 class S3Client:
@@ -149,7 +145,7 @@ class S3Client:
         try:
             print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
             recursive_upload(bucket, root_path)
-            delete_objects(bucket, self.checksums, new_checksums)
+            self.delete_objects(bucket, new_checksums)
             print('\nSuccess!')
 
         except ClientError:
@@ -184,3 +180,17 @@ class S3Client:
         except ClientError as err:
             print('Unable to upload file: {0} to {1}. '.format(path, bucket.name) + str(err))
             raise err
+
+
+    def delete_objects(self, bucket, new_checksums):
+        """Deletes obsolete objects in bucket based on checksum"""
+        try:
+            for obj in bucket.objects.all():
+                key = obj.key
+
+                if self.checksums.get(key, '') and not new_checksums.get(key, ''):
+                    print('Deleting {0} from {1}.'.format(key, bucket.name))
+                    obj.delete()
+
+        except ClientError as err:
+            print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')

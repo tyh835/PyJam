@@ -76,17 +76,3 @@ def set_website_config(bucket):
     except ClientError as err:
         print('Unable to apply bucket policy to {0}. '.format(bucket.name) + str(err)+ '\n')
         raise err
-
-
-def delete_objects(bucket, old_checksums, new_checksums):
-    """Deletes obsolete objects in bucket based on checksum"""
-    try:
-        for obj in bucket.objects.all():
-            key = obj.key
-
-            if old_checksums.get(key, '') and not new_checksums.get(key, ''):
-                print('Deleting {0} from {1}.'.format(key, bucket.name))
-                obj.delete()
-
-    except ClientError as err:
-        print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
