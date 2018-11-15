@@ -138,7 +138,7 @@ class S3Client:
                     self.new_checksums[key] = etag
 
         try:
-            print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
+            print('\nBegin syncing {0} to bucket {1}...\n'.format(path, bucket_name))
             recursive_upload(bucket, root_path)
             self.delete_objects(bucket)
             print('\nSuccess!')
