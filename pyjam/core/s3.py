@@ -3,29 +3,6 @@
 import mimetypes
 from botocore.exceptions import ClientError
 
-def create_bucket(s3, region, bucket_name):
-    """Creates new S3 bucket in given region"""
-    try:
-        if region == 'us-east-1':
-            print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
-            return s3.create_bucket(Bucket=bucket_name)
-
-        print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
-        return s3.create_bucket(
-            Bucket=bucket_name,
-            CreateBucketConfiguration={
-                'LocationConstraint': region
-            }
-        )
-
-    except ClientError as err:
-        if err.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
-            print('{0} already exists. Continuing...'.format(bucket_name))
-            return s3.Bucket(bucket_name)
-
-        print('Unable to create bucket: {0}.'.format(bucket_name) + str(err))
-        raise err
-
 
 def set_bucket_policy(bucket):
     """Configures bucket policy to allow public reads"""

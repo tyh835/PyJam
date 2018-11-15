@@ -1,11 +1,9 @@
 """Client classes for PyJam"""
 
 from pathlib import Path
-
 import boto3
 from botocore.exceptions import ClientError
 from pyjam.core.s3 import (
-    create_bucket,
     set_bucket_policy,
     set_website_config,
     delete_objects,
@@ -16,10 +14,34 @@ class S3Client:
     """Class for S3 Client"""
     def __init__(self, **kwargs):
         """Setup session and s3 ServiceResource"""
-        params = { key: value for key, value in kwargs.items() if value is not None }
+        params = { k:v for k, v in kwargs.items() if v is not None }
 
         self.session = boto3.Session(**params)
         self.s3 = self.session.resource('s3')
+
+
+    def create_bucket(self, bucket_name):
+        """Creates new S3 bucket in given region"""
+        try:
+            if self.session.region_name == 'us-east-1':
+                print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
+                return self.s3.create_bucket(Bucket=bucket_name)
+
+            print('\nCreating S3 bucket {0}.\n'.format(bucket_name))
+            return self.s3.create_bucket(
+                Bucket=bucket_name,
+                CreateBucketConfiguration={
+                    'LocationConstraint': self.session.region_name
+                }
+            )
+
+        except ClientError as err:
+            if err.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
+                print('{0} already exists. Continuing...'.format(bucket_name))
+                return self.s3.Bucket(bucket_name)
+
+            print('Unable to create bucket: {0}.'.format(bucket_name) + str(err))
+            raise err
 
 
     def print_buckets(self):
@@ -42,7 +64,7 @@ class S3Client:
     def setup_hosting_bucket(self, bucket_name):
         """Setup S3 bucket for website hosting"""
         try:
-            bucket = create_bucket(self.s3, self.session.region_name, bucket_name)
+            bucket = self.create_bucket(bucket_name)
             set_bucket_policy(bucket)
             set_website_config(bucket)
             print('\nSuccess!')
