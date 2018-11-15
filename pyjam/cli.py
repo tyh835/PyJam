@@ -20,12 +20,12 @@ def cli():
 
 
 @cli.group('list')
-def ls():
+def lst():
     """Command for listing S3 buckets and objects"""
     pass
 
 
-@ls.command('buckets')
+@lst.command('buckets')
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
 def list_buckets(**kwargs):
@@ -34,7 +34,7 @@ def list_buckets(**kwargs):
     return client.print_buckets()
 
 
-@ls.command('bucket')
+@lst.command('bucket')
 @click.argument('bucket_name')
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
