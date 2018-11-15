@@ -7,7 +7,8 @@ from pyjam.utils.s3 import (
     set_bucket_policy,
     set_website_config,
     delete_objects,
-    upload_file
+    upload_file,
+    get_endpoint
 )
 
 
@@ -19,6 +20,25 @@ class S3Client:
 
         self.session = boto3.Session(**params)
         self.s3 = self.session.resource('s3')
+
+
+    def get_bucket(self, bucket_name):
+        """Get a bucket by name."""
+        return self.s3.Bucket(bucket_name)
+
+
+    def get_region_name(self, bucket_name):
+        """Get the bucket's region name."""
+        bucket_location = self.s3.meta.client.get_bucket_location(Bucket=bucket_name.name)
+        return bucket_location["LocationConstraint"] or 'us-east-1'
+
+
+    def get_bucket_url(self, bucket):
+        """Get the website URL for this bucket."""
+        return "http://{}.{}".format(
+            bucket.name,
+            get_endpoint(self.get_region_name(bucket)).host
+        )
 
 
     def create_bucket(self, bucket_name):
@@ -68,7 +88,7 @@ class S3Client:
             bucket = self.create_bucket(bucket_name)
             set_bucket_policy(bucket)
             set_website_config(bucket)
-            print('\nSuccess!')
+            print('\nSuccess! URL: {0}'.format(self.get_bucket_url(bucket)))
 
         except ClientError:
             print('\nFailed to setup bucket {0}. '.format(bucket_name))
