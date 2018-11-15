@@ -52,14 +52,10 @@ class S3Client:
 
     def load_checksums(self, bucket_name):
         """Load etag metadata for caching purposes."""
-        checksums = {}
-
         paginator = self.s3.meta.client.get_paginator('list_objects_v2')
         for page in paginator.paginate(Bucket=bucket_name):
             for obj in page.get('Contents', []):
-                checksums[obj['Key']] = obj['ETag']
-
-        self.checksums = checksums
+                self.checksums[obj['Key']] = obj['ETag']
 
 
     def create_bucket(self, bucket_name):
