@@ -3,7 +3,7 @@
 import uuid
 import boto3
 from botocore.exceptions import ClientError
-from pyjam.utils.s3 import set_bucket_policy, set_website_config
+from pyjam.utils.s3 import set_bucket_policy, set_website_config, get_endpoint
 
 
 class Route53Client:
@@ -16,6 +16,13 @@ class Route53Client:
         self.session = boto3.Session(**params)
         self.route53 = self.session.client('route53')
         self.s3 = self.session.resource('s3')
+        self.cloudfront = self.session.client('cloudfront')
+
+
+    def get_bucket_region(self, bucket_name):
+        """Get the bucket's region name."""
+        bucket_location = self.s3.meta.client.get_bucket_location(Bucket=bucket_name)
+        return bucket_location["LocationConstraint"] or 'us-east-1'
 
 
     def find_hosted_zone(self, domain_name):
@@ -38,7 +45,19 @@ class Route53Client:
         )
 
 
-    def create_s3_domain_record(self, zone, domain_name, endpoint):
+    def find_matching_distribution(self, domain_name):
+        """Find a dist matching domain_name."""
+        paginator = self.cloudfront.get_paginator('list_distributions')
+        for page in paginator.paginate():
+            for distribution in page['DistributionList'].get('Items', []):
+                for alias in distribution['Aliases']['Items']:
+                    if alias == domain_name:
+                        return distribution
+
+        return {}
+
+
+    def create_s3_domain_record(self, domain_name):
         """Create a domain record in zone for domain_name."""
         try:
             bucket = self.s3.Bucket(domain_name)
@@ -47,12 +66,17 @@ class Route53Client:
             set_website_config(bucket)
 
         except ClientError as err:
-            print('Unable to find bucket {0}. Please first setup hosting S3 bucket. '.format(
-                domain_name
-            ) + str(err) + '\n')
+            print('Unable to find bucket {0}. '.format(domain_name) + str(err) + '\n')
+            print('Please run `jam setup bucket {0}` first. '.format(domain_name))
+
             return
 
         try:
+            region = self.get_bucket_region(domain_name)
+            zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
+            endpoint = get_endpoint(region)
+
+            print('Creating Alias record for {0}...'.format(domain_name))
             self.route53.change_resource_record_sets(
                 HostedZoneId=zone['Id'],
                 ChangeBatch={
@@ -73,18 +97,26 @@ class Route53Client:
                     ]
                 }
             )
+            print('\nSuccess!')
 
         except ClientError as err:
-            print('Unable to create Alias record for {0} to point to {1}. '.format(
-                domain_name,
+            print('Unable to create Alias record to point to {0}. '.format(
                 domain_name + '.' + endpoint.host
             ) + str(err) + '\n')
 
 
 
-    def create_cf_domain_record(self, zone, domain_name, cf_domain):
+    def create_cf_domain_record(self, domain_name):
         """Create a domain record in zone for domain_name."""
         try:
+            zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
+            cf_domain = self.find_matching_distribution(domain_name).get('DomainName', None)
+
+            if not cf_domain:
+                print('\nError: matching CloudFront distribution does not exist.')
+                print('Please run `jam setup distribution` first.\n')
+                return
+
             self.route53.change_resource_record_sets(
                 HostedZoneId=zone['Id'],
                 ChangeBatch={
@@ -107,7 +139,6 @@ class Route53Client:
             )
 
         except ClientError as err:
-            print('Unable to create Alias record for {0} to point to {1}. '.format(
-                domain_name,
-                cf_domain
+            print('Unable to create Alias record for {0}. '.format(
+                domain_name
             ) + str(err) + '\n')

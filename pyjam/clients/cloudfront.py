@@ -3,6 +3,7 @@
 import uuid
 import boto3
 from botocore.exceptions import ClientError
+from pyjam.utils.s3 import get_endpoint
 
 
 class CloudFrontClient:
@@ -14,28 +15,39 @@ class CloudFrontClient:
 
         self.session = boto3.Session(**params)
         self.cloudfront = self.session.client('cloudfront')
+        self.acm = self.session.client('acm', region_name='us-east-1')
 
 
-    def find_matching_distribution(self, domain_name):
-        """Find a dist matching domain_name."""
-        paginator = self.cloudfront.get_paginator('list_distributions')
-        for page in paginator.paginate():
-            print(page)
-            for dist in page['DistributionList'].get('Items', []):
-                for alias in dist['Aliases']['Items']:
-                    if alias == domain_name:
-                        return dist
+    def certificate_matches(self, certificate_arn, domain_name):
+        """Return True if cert matches domain_name."""
+        cert_details = self.acm.describe_certificate(CertificateArn=certificate_arn)
+        alt_names = cert_details['Certificate']['SubjectAlternativeNames']
+
+        for name in alt_names:
+            if name == domain_name:
+                return True
+
+            if name[0] == '*' and domain_name.endswith(name[1:]):
+                return True
+
+        return False
+
+
+    def find_matching_cert(self, domain_name):
+        """Find a certificate matching domain_name."""
+        paginator = self.acm.get_paginator('list_certificates')
+        for page in paginator.paginate(CertificateStatuses=['ISSUED']):
+            for cert in page['CertificateSummaryList']:
+                if self.certificate_matches(cert['CertificateArn'], domain_name):
+                    return cert
 
         return None
+
 
 
     def create_distribution(self, domain_name, region, cert):
         """Create a dist for domain_name using cert."""
         origin_id = 'S3-Website-' + domain_name
-        region_name = '-' + region
-
-        if region == 'us-east-1':
-            region_name = ''
 
         try:
             result = self.cloudfront.create_distribution(
@@ -54,7 +66,7 @@ class CloudFrontClient:
                             {
                                 'Id': origin_id,
                                 'DomainName':
-                                '{0}.s3-website{1}.amazonaws.com'.format(domain_name, region_name),
+                                '{0}.{1}'.format(domain_name, get_endpoint(region)),
                                 'S3OriginConfig': {
                                     'OriginAccessIdentity': ''
                                 }
@@ -89,8 +101,6 @@ class CloudFrontClient:
 
         except ClientError as err:
             print('Unable to create distribution for {0}. '.format(domain_name) + str(err) + '\n')
-
-
 
 
     def await_deploy(self, dist):
