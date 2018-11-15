@@ -39,10 +39,14 @@ class Route53Client:
     def create_hosted_zone(self, domain_name):
         """Create a hosted zone to match domain_name."""
         zone_name = '.'.join(domain_name.split('.')[-2:]) + '.'
-        return self.route53.create_hosted_zone(
-            Name=zone_name,
-            CallerReference=str(uuid.uuid4())
-        )
+        try:
+            return self.route53.create_hosted_zone(
+                Name=zone_name,
+                CallerReference=str(uuid.uuid4())
+            )
+
+        except ClientError as err:
+            print('Unable to create hosted zone for {0}. '.format(domain_name) + str(err) + '\n')
 
 
     def find_matching_distribution(self, domain_name):
@@ -120,7 +124,7 @@ class Route53Client:
             self.route53.change_resource_record_sets(
                 HostedZoneId=zone['Id'],
                 ChangeBatch={
-                    'Comment': 'Created by webotron',
+                    'Comment': 'Created by PyJam',
                     'Changes': [
                         {
                             'Action': 'UPSERT',

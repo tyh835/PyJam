@@ -91,7 +91,7 @@ def setup_domain(domain, s3, cf, **kwargs):
     """Setup S3 bucket for website hosting [options]"""
     client = Route53Client(**kwargs)
     if not s3 and not cf:
-        print('Error: please specify an option --s3 or --cf')
+        print('Error: please specify an option (--s3 or --cf)')
     if s3:
         client.create_s3_domain_record(domain)
     if cf:

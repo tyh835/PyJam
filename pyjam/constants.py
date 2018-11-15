@@ -1,4 +1,4 @@
 """Constants for PyJam"""
 
-VERSION = '0.1.7'
+VERSION = '0.2.0'
 CHUNK_SIZE = 8388608
