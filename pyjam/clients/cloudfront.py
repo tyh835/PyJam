@@ -2,6 +2,7 @@
 
 import uuid
 import boto3
+from botocore.exceptions import ClientError
 
 
 class CloudFrontClient:
@@ -14,7 +15,8 @@ class CloudFrontClient:
         self.session = boto3.Session(**params)
         self.cloudfront = self.session.client('cloudfront')
 
-    def find_matching_dist(self, domain_name):
+
+    def find_matching_distribution(self, domain_name):
         """Find a dist matching domain_name."""
         paginator = self.cloudfront.get_paginator('list_distributions')
         for page in paginator.paginate():
@@ -26,56 +28,70 @@ class CloudFrontClient:
 
         return None
 
-    def create_dist(self, domain_name, cert):
+
+    def create_distribution(self, domain_name, region, cert):
         """Create a dist for domain_name using cert."""
-        origin_id = 'S3-' + domain_name
+        origin_id = 'S3-Website-' + domain_name
+        region_name = '-' + region
 
-        result = self.cloudfront.create_distribution(
-            DistributionConfig={
-                'CallerReference': str(uuid.uuid4()),
-                'Aliases': {
-                    'Quantity': 1,
-                    'Items': [domain_name]
-                },
-                'DefaultRootObject': 'index.html',
-                'Comment': 'Created by webotron',
-                'Enabled': True,
-                'Origins': {
-                    'Quantity': 1,
-                    'Items': [{
-                        'Id': origin_id,
-                        'DomainName':
-                        '{}.s3.amazonaws.com'.format(domain_name),
-                        'S3OriginConfig': {
-                            'OriginAccessIdentity': ''
-                        }
-                    }]
-                },
-                'DefaultCacheBehavior': {
-                    'TargetOriginId': origin_id,
-                    'ViewerProtocolPolicy': 'redirect-to-https',
-                    'TrustedSigners': {
-                        'Quantity': 0,
-                        'Enabled': False
+        if region == 'us-east-1':
+            region_name = ''
+
+        try:
+            result = self.cloudfront.create_distribution(
+                DistributionConfig={
+                    'CallerReference': str(uuid.uuid4()),
+                    'Aliases': {
+                        'Quantity': 1,
+                        'Items': [domain_name]
                     },
-                    'ForwardedValues': {
-                        'Cookies': {'Forward': 'all'},
-                        'Headers': {'Quantity': 0},
-                        'QueryString': False,
-                        'QueryStringCacheKeys': {'Quantity': 0}
+                    'DefaultRootObject': 'index.html',
+                    'Comment': 'Created by PyJam',
+                    'Enabled': True,
+                    'Origins': {
+                        'Quantity': 1,
+                        'Items': [
+                            {
+                                'Id': origin_id,
+                                'DomainName':
+                                '{0}.s3-website{1}.amazonaws.com'.format(domain_name, region_name),
+                                'S3OriginConfig': {
+                                    'OriginAccessIdentity': ''
+                                }
+                            }
+                        ]
                     },
-                    'DefaultTTL': 86400,
-                    'MinTTL': 3600
-                },
-                'ViewerCertificate': {
-                    'ACMCertificateArn': cert['CertificateArn'],
-                    'SSLSupportMethod': 'sni-only',
-                    'MinimumProtocolVersion': 'TLSv1.1_2016'
+                    'DefaultCacheBehavior': {
+                        'TargetOriginId': origin_id,
+                        'ViewerProtocolPolicy': 'redirect-to-https',
+                        'TrustedSigners': {
+                            'Quantity': 0,
+                            'Enabled': False
+                        },
+                        'ForwardedValues': {
+                            'Cookies': {'Forward': 'all'},
+                            'Headers': {'Quantity': 0},
+                            'QueryString': False,
+                            'QueryStringCacheKeys': {'Quantity': 0}
+                        },
+                        'DefaultTTL': 86400,
+                        'MinTTL': 3600
+                    },
+                    'ViewerCertificate': {
+                        'ACMCertificateArn': cert['CertificateArn'],
+                        'SSLSupportMethod': 'sni-only',
+                        'MinimumProtocolVersion': 'TLSv1.1_2016'
+                    }
                 }
-            }
-        )
+            )
 
-        return result['Distribution']
+            return result['Distribution']
+
+        except ClientError as err:
+            print('Unable to create distribution for {0}. '.format(domain_name) + str(err) + '\n')
+
+
+
 
     def await_deploy(self, dist):
         """Wait for dist to be deployed."""
