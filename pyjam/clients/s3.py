@@ -10,7 +10,7 @@ from pyjam.utils.s3 import (
     upload_file,
     get_endpoint
 )
-from pyjam.utils.checksum import generate_etag
+from pyjam.utils.checksum import generate_checksum
 from pyjam.constants import CHUNK_SIZE
 
 
@@ -48,16 +48,16 @@ class S3Client:
         )
 
 
-    def load_manifest(self, bucket_name):
-        """Load manifest for caching purposes."""
-        manifest = {}
+    def load_checksums(self, bucket_name):
+        """Load etag metadata for caching purposes."""
+        checksums = {}
 
         paginator = self.s3.meta.client.get_paginator('list_objects_v2')
         for page in paginator.paginate(Bucket=bucket_name):
             for obj in page.get('Contents', []):
-                manifest[obj['Key']] = obj['ETag']
+                checksums[obj['Key']] = obj['ETag']
 
-        return manifest
+        return checksums
 
 
     def create_bucket(self, bucket_name):
@@ -117,11 +117,13 @@ class S3Client:
         """Sync path recursively to the given bucket"""
         bucket = self.s3.Bucket(bucket_name)
         root_path = Path(path).expanduser().resolve()
-        manifest = self.load_manifest(bucket_name)
         transfer_config = boto3.s3.transfer.TransferConfig(
             multipart_chunksize=CHUNK_SIZE,
             multipart_threshold=CHUNK_SIZE
         )
+
+        old_checksums = self.load_checksums(bucket_name)
+        new_checksums = {}
 
         def recursive_upload(bucket, target_path):
             """Uploads files recursively from root path to S3 bucket"""
@@ -129,18 +131,25 @@ class S3Client:
                 if path.is_dir():
                     recursive_upload(bucket, path)
 
+
                 if path.is_file():
-                    upload_file(
+                    key = str(path.relative_to(root_path))
+                    path = str(path)
+
+                    etag = upload_file(
                         bucket,
-                        str(path),
-                        str(path.relative_to(root_path)),
+                        old_checksums,
+                        path,
+                        key,
                         transfer_config
                     )
 
+                    new_checksums[key] = etag
+
         try:
             print('\nBegin syncing {0} to bucket {1}...'.format(path, bucket_name))
-            delete_objects(bucket)
             recursive_upload(bucket, root_path)
+            delete_objects(bucket, old_checksums, new_checksums)
             print('\nSuccess!')
 
         except ClientError:

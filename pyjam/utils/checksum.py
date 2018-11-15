@@ -13,8 +13,8 @@ def hash_data(data):
     return data_hash
 
 
-def generate_etag(path):
-    """Generate etag for file."""
+def generate_checksum(path):
+    """Generate checksum (S3 ETag) for file based on path"""
     hashes = []
 
     with open(path, 'rb') as file:

@@ -3,6 +3,7 @@
 import mimetypes
 from collections import namedtuple
 from botocore.exceptions import ClientError
+from pyjam.utils.checksum import generate_checksum
 
 
 Endpoint = namedtuple('Endpoint', ['host', 'zone'])
@@ -79,25 +80,32 @@ def set_website_config(bucket):
         raise err
 
 
-def delete_objects(bucket):
-    """Deletes all object in bucket"""
+def delete_objects(bucket, old_checksums, new_checksums):
+    """Deletes obsolete objects in bucket based on checksum"""
     try:
         for obj in bucket.objects.all():
-            print('Deleting {0} from {1}.'.format(obj.key, bucket.name))
-            obj.delete()
+            key = obj.key
+
+            if old_checksums.get(key, '') and not new_checksums.get(key, ''):
+                print('Deleting {0} from {1}.'.format(key, bucket.name))
+                obj.delete()
 
     except ClientError as err:
         print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
 
 
-def upload_file(bucket, file_path, key, transfer_config):
+def upload_file(bucket, old_checksums, path, key, transfer_config):
     """Uploads file to S3 bucket"""
     content_type = mimetypes.guess_type(key)[0] or 'text/plain'
+    checksum = generate_checksum(path)
+
+    if old_checksums.get(key, '') == checksum:
+        return checksum
 
     try:
         print('Uploading {0} to {1} (content-type: {2}).'.format(key, bucket.name, content_type))
         bucket.upload_file(
-            file_path,
+            path,
             key,
             ExtraArgs={
                 'ContentType': content_type
@@ -105,6 +113,8 @@ def upload_file(bucket, file_path, key, transfer_config):
             Config=transfer_config
         )
 
+        return checksum
+
     except ClientError as err:
-        print('Unable to upload file: {0} to {1}. '.format(file_path, bucket.name) + str(err))
+        print('Unable to upload file: {0} to {1}. '.format(path, bucket.name) + str(err))
         raise err
