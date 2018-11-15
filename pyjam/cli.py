@@ -1,4 +1,4 @@
-"""Cli entrypoint for PyJam"""
+"""CLI entrypoint for PyJam"""
 
 import click
 from pyjam.constants import VERSION
