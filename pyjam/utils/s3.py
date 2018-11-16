@@ -35,7 +35,7 @@ def get_endpoint(region):
 def get_bucket_region(session, bucket_name):
     """Get the bucket's region name."""
     try:
-        bucket_location = session.s3.meta.client.get_bucket_location(Bucket=bucket_name)
+        bucket_location = session.resource('s3').meta.client.get_bucket_location(Bucket=bucket_name)
         return bucket_location["LocationConstraint"] or 'us-east-1'
 
     except ClientError as err:
