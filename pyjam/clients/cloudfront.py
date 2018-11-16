@@ -58,7 +58,7 @@ class CloudFrontClient:
                 print('and make sure to use us-east-1 (N. Virginia)!\n')
                 return
 
-            result = self.cloudfront.create_distribution(
+            response = self.cloudfront.create_distribution(
                 DistributionConfig={
                     'CallerReference': str(uuid.uuid4()),
                     'Aliases': {
@@ -110,17 +110,18 @@ class CloudFrontClient:
                 }
             )
 
-            self.await_deploy(result['Distribution'])
+            self.await_deploy(response['Distribution'])
 
         except ClientError as err:
             print('Unable to create distribution for {0}. '.format(bucket_name) + str(err) + '\n')
 
 
     def await_deploy(self, distribution):
-        """Wait for dist to be deployed."""
+        """Wait for distribution to be deployed"""
         waiter = self.cloudfront.get_waiter('distribution_deployed')
 
         print('Awaiting CloudFront distribution to be created...')
+        print('This may take some time.')
 
         waiter.wait(
             Id=distribution['Id'],
