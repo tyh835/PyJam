@@ -91,8 +91,8 @@ class ACMClient:
             )
 
             certificate_arn = response['CertificateArn']
-            certificate = self.describe_certificate(certificate_arn)['Certificate']
 
+            certificate = self.describe_certificate(certificate_arn)['Certificate']
             self.create_validation_record(domain_name, certificate)
             self.await_validation(certificate_arn)
 
