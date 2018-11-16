@@ -75,10 +75,7 @@ class ACMClient:
     def request_certificate(self, domain_name):
         """Requests an ACM SSL certificate for your domain"""
         try:
-            alt_name = '*.' + domain_name
-
-            if domain_name and domain_name[0] == '*':
-                alt_name = domain_name[2:]
+            alt_name = '*.' + domain_name if domain_name[0] != '*' else domain_name[2:]
 
             print('Requesting certificate for domain {0}...'.format(domain_name))
 
