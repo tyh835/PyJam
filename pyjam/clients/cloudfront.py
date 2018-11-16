@@ -59,7 +59,6 @@ class CloudFrontClient:
                 return
 
             print('Creating CloudFront distribution for {0}...'.format(bucket_name))
-            print('This may take some time.')
 
             response = self.cloudfront.create_distribution(
                 DistributionConfig={
@@ -124,13 +123,14 @@ class CloudFrontClient:
         waiter = self.cloudfront.get_waiter('distribution_deployed')
 
         print('\nDomain configured: https://{0}'.format(distribution['DomainName']))
+        print('This may take some time.')
         print('...')
 
         waiter.wait(
             Id=distribution['Id'],
             WaiterConfig={
                 'Delay': 30,
-                'MaxAttempts': 50
+                'MaxAttempts': 80
             }
         )
 
