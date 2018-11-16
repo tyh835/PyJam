@@ -42,29 +42,33 @@ class ACMClient:
             print('Creating CNAME record for DNS validation...')
 
             for record in validation_records:
-                resource_record = record['ResourceRecord']
+                try:
+                    resource_record = record['ResourceRecord']
 
-                self.route53.change_resource_record_sets(
-                    HostedZoneId=zone['Id'],
-                    ChangeBatch={
-                        'Comment': 'Created by PyJam',
-                        'Changes': [
-                            {
-                                'Action': 'UPSERT',
-                                'ResourceRecordSet': {
-                                    'Name': resource_record['Name'],
-                                    'Type': resource_record['Type'],
-                                    'TTL': 60,
-                                    'ResourceRecords': [
-                                        {
-                                            'Value': resource_record['Value']
-                                        }
-                                    ]
+                    self.route53.change_resource_record_sets(
+                        HostedZoneId=zone['Id'],
+                        ChangeBatch={
+                            'Comment': 'Created by PyJam',
+                            'Changes': [
+                                {
+                                    'Action': 'UPSERT',
+                                    'ResourceRecordSet': {
+                                        'Name': resource_record['Name'],
+                                        'Type': resource_record['Type'],
+                                        'TTL': 60,
+                                        'ResourceRecords': [
+                                            {
+                                                'Value': resource_record['Value']
+                                            }
+                                        ]
+                                    }
                                 }
-                            }
-                        ]
-                    }
-                )
+                            ]
+                        }
+                    )
+
+                except KeyError:
+                    print('\nSomething went wrong, please try again')
 
         except ClientError as err:
             print('Unable to create CNAME record for validation of domain {0}. '.format(
