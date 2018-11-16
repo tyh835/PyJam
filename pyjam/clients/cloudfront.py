@@ -109,8 +109,6 @@ class CloudFrontClient:
 
             self.await_deploy(result['Distribution'])
 
-            return result['Distribution']
-
         except ClientError as err:
             print('Unable to create distribution for {0}. '.format(domain_name) + str(err) + '\n')
 
