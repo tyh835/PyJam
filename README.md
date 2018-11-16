@@ -4,11 +4,11 @@ Version: 0.2.1
 
 ## About
 
-`jam` is a CLI tool to deploy static sites to AWS. It can sync to an S3 bucket, and configuring it for static site hosting. It can also optionally configure Route53 and CloudFront.
+`jam` is a CLI tool to deploy static sites to AWS. It can sync to an S3 bucket, and configuring it for static site hosting. It can also optionally configure Route53, ACM SSL Certificate and CloudFront.
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
-This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project. Improvements include error handling, API, deleting stale files on sync, and configuring CloudFront to directly cache S3 website hosting URL.
+This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project. Improvements include error handling, API, deleting stale files on sync, ability to request SSL certificates, and configuring CloudFront to directly cache S3 website hosting URL.
 
 ## Configuring for Development
 
@@ -35,6 +35,8 @@ The profile should be an AWS power user (more restrictive permissions pending).
 - `--s3`: create records to point to S3 hosted website with corresponding domain name. NOTE: bucket name must be the same as domain name.
 
 - `--cf`: create records to point a CloudFront distribution. NOTE: distribution CNAME must point to the domain name.
+
+`jam setup certificate` - Create and configure an ACM certificate to use for CloudFront distribution. Works with Route53 issued domain names.
 
 `jam setup cloudfront` - Create and configure a CloudFront distribution to cache a S3 hosted static website.
 
