@@ -44,13 +44,12 @@ class CloudFrontClient:
         return None
 
 
-
-    def create_distribution(self, domain_name):
+    def create_distribution(self, bucket_name):
         """Create a CloudFront distribution for domain with certificate"""
         try:
-            region = get_bucket_region(self.session, domain_name)
-            origin_id = 'S3-Website-' + '{0}.{1}'.format(domain_name, get_endpoint(region).host)
-            certificate = self.find_matching_cert(domain_name)
+            region = get_bucket_region(self.session, bucket_name)
+            origin_id = 'S3-Website-' + '{0}.{1}'.format(bucket_name, get_endpoint(region).host)
+            certificate = self.find_matching_cert(bucket_name)
 
             if not certificate:
                 print('\nError: no SSL certificate found.')
@@ -63,7 +62,7 @@ class CloudFrontClient:
                     'CallerReference': str(uuid.uuid4()),
                     'Aliases': {
                         'Quantity': 1,
-                        'Items': [domain_name]
+                        'Items': [bucket_name]
                     },
                     'DefaultRootObject': '',
                     'Comment': 'Created by PyJam',
@@ -73,7 +72,7 @@ class CloudFrontClient:
                         'Items': [
                             {
                                 'Id': origin_id,
-                                'DomainName': '{0}.{1}'.format(domain_name, get_endpoint(region).host),
+                                'DomainName': '{0}.{1}'.format(bucket_name, get_endpoint(region).host),
                                 'CustomOriginConfig': {
                                     'HTTPPort': 80,
                                     'HTTPSPort': 443,
@@ -110,7 +109,7 @@ class CloudFrontClient:
             self.await_deploy(result['Distribution'])
 
         except ClientError as err:
-            print('Unable to create distribution for {0}. '.format(domain_name) + str(err) + '\n')
+            print('Unable to create distribution for {0}. '.format(bucket_name) + str(err) + '\n')
 
 
     def await_deploy(self, distribution):

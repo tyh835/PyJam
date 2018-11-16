@@ -99,13 +99,13 @@ def setup_domain(domain, s3, cf, **kwargs):
 
 
 @setup.command('cloudfront')
-@click.argument('domain')
+@click.argument('bucket_name')
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
-def setup_cloudfront(domain, **kwargs):
+def setup_cloudfront(bucket_name, **kwargs):
     """Setup S3 bucket for website hosting [options]"""
     client = CloudFrontClient(**kwargs)
-    client.create_distribution(domain)
+    client.create_distribution(bucket_name)
 
 
 if __name__ == '__main__':
