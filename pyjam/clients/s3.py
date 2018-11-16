@@ -5,7 +5,12 @@ from pathlib import Path
 import boto3
 from botocore.exceptions import ClientError
 
-from pyjam.utils.s3 import get_endpoint, set_bucket_policy, set_website_config
+from pyjam.utils.s3 import (
+    set_bucket_policy,
+    set_website_config,
+    get_endpoint,
+    get_bucket_region
+)
 from pyjam.utils.checksum import generate_checksum
 from pyjam.constants import CHUNK_SIZE
 
@@ -27,27 +32,16 @@ class S3Client:
         self.new_checksums = {}
 
 
-    def get_bucket(self, bucket_name):
-        """Get a bucket by name."""
-        return self.s3.Bucket(bucket_name)
-
-
-    def get_bucket_region(self, bucket_name):
-        """Get the bucket's region name."""
-        bucket_location = self.s3.meta.client.get_bucket_location(Bucket=bucket_name)
-        return bucket_location["LocationConstraint"] or 'us-east-1'
-
-
     def get_bucket_endpoint(self, bucket_name):
         """Get the S3 endpoints for this bucket."""
-        return get_endpoint(self.get_bucket_region(bucket_name))
+        return get_endpoint(get_bucket_region(self.session, bucket_name))
 
 
     def get_bucket_url(self, bucket_name):
         """Get the website URL for this bucket."""
         return "http://{}.{}".format(
             bucket_name,
-            get_endpoint(self.get_bucket_region(bucket_name)).host
+            get_endpoint(get_bucket_region(self.session, bucket_name)).host
         )
 
 
@@ -109,7 +103,7 @@ class S3Client:
             print('\nSuccess! URL: {0}'.format(self.get_bucket_url(bucket_name)))
 
         except ClientError:
-            print('\nFailed to setup bucket {0}. '.format(bucket_name))
+            print('\nFailed to setup bucket: {0}. '.format(bucket_name))
 
 
     def sync_to_bucket(self, path, bucket_name):

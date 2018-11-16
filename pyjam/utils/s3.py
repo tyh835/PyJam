@@ -32,6 +32,16 @@ def get_endpoint(region):
     return REGION_ENDPOINTS[region]
 
 
+def get_bucket_region(session, bucket_name):
+    """Get the bucket's region name."""
+    try:
+        bucket_location = session.s3.meta.client.get_bucket_location(Bucket=bucket_name)
+        return bucket_location["LocationConstraint"] or 'us-east-1'
+
+    except ClientError as err:
+        print('Unable to find bucket: {0}. '.format(bucket_name) + str(err) + '\n')
+
+
 def set_bucket_policy(bucket):
     """Configures bucket policy to allow public reads"""
     policy = '''

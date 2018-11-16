@@ -3,7 +3,7 @@
 import uuid
 import boto3
 from botocore.exceptions import ClientError
-from pyjam.utils.s3 import get_endpoint
+from pyjam.utils.s3 import get_endpoint, get_bucket_region
 
 
 class CloudFrontClient:
@@ -19,7 +19,7 @@ class CloudFrontClient:
 
 
     def certificate_matches(self, certificate_arn, domain_name):
-        """Return True if cert matches domain_name."""
+        """Return True if certificate matches domain_name"""
         cert_details = self.acm.describe_certificate(CertificateArn=certificate_arn)
         alt_names = cert_details['Certificate']['SubjectAlternativeNames']
 
@@ -34,7 +34,7 @@ class CloudFrontClient:
 
 
     def find_matching_cert(self, domain_name):
-        """Find a certificate matching domain_name."""
+        """Find a certificate matching domain_name"""
         paginator = self.acm.get_paginator('list_certificates')
         for page in paginator.paginate(CertificateStatuses=['ISSUED']):
             for cert in page['CertificateSummaryList']:
@@ -45,11 +45,13 @@ class CloudFrontClient:
 
 
 
-    def create_distribution(self, domain_name, region, cert):
-        """Create a dist for domain_name using cert."""
-        origin_id = 'S3-Website-' + domain_name
-
+    def create_distribution(self, domain_name):
+        """Create a CloudFront distribution for domain with certificate"""
         try:
+            origin_id = 'S3-Website-' + domain_name
+            region = get_bucket_region(self.session, domain_name)
+            certificate = self.find_matching_cert(domain_name)
+
             result = self.cloudfront.create_distribution(
                 DistributionConfig={
                     'CallerReference': str(uuid.uuid4()),
@@ -57,7 +59,7 @@ class CloudFrontClient:
                         'Quantity': 1,
                         'Items': [domain_name]
                     },
-                    'DefaultRootObject': 'index.html',
+                    'DefaultRootObject': '',
                     'Comment': 'Created by PyJam',
                     'Enabled': True,
                     'Origins': {
@@ -66,7 +68,7 @@ class CloudFrontClient:
                             {
                                 'Id': origin_id,
                                 'DomainName':
-                                '{0}.{1}'.format(domain_name, get_endpoint(region)),
+                                '{0}.{1}'.format(domain_name, get_endpoint(region).host),
                                 'S3OriginConfig': {
                                     'OriginAccessIdentity': ''
                                 }
@@ -90,12 +92,15 @@ class CloudFrontClient:
                         'MinTTL': 3600
                     },
                     'ViewerCertificate': {
-                        'ACMCertificateArn': cert['CertificateArn'],
+                        'ACMCertificateArn': certificate['CertificateArn'],
                         'SSLSupportMethod': 'sni-only',
                         'MinimumProtocolVersion': 'TLSv1.1_2016'
-                    }
+                    },
+                    'IsIPV6Enabled': True
                 }
             )
+
+            self.await_deploy(result)
 
             return result['Distribution']
 
@@ -103,10 +108,15 @@ class CloudFrontClient:
             print('Unable to create distribution for {0}. '.format(domain_name) + str(err) + '\n')
 
 
-    def await_deploy(self, dist):
+    def await_deploy(self, distribution):
         """Wait for dist to be deployed."""
         waiter = self.cloudfront.get_waiter('distribution_deployed')
-        waiter.wait(Id=dist['Id'], WaiterConfig={
-            'Delay': 30,
-            'MaxAttempts': 50
-        })
+
+        print('Awaiting CloudFront distribution to be created...')
+        waiter.wait(
+            Id=distribution['Id'],
+            WaiterConfig={
+                'Delay': 30,
+                'MaxAttempts': 50
+            }
+        )
