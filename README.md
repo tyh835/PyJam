@@ -4,7 +4,7 @@ Version: 0.2.0
 
 ## About
 
-`pyjam` is a CLI tool to deploy static sute by uploading to an S3 bucket, and configuring it to host a static website. It can also optionally configure Route53 and CloudFront.
+`jam` is a CLI tool to deploy static sites to AWS. It can sync to an S3 bucket, and configuring it for static site hosting. It can also optionally configure Route53 and CloudFront.
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
