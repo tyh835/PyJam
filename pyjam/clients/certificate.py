@@ -60,31 +60,35 @@ class ACMClient:
 
         try:
             zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
-            validation_records = certificate['DomainValidationOptions']['ResourceRecord']
+            validation_records = certificate['DomainValidationOptions']
 
-            self.route53.change_resource_record_sets(
-                HostedZoneId=zone['Id'],
-                ChangeBatch={
-                    'Comment': 'Created by PyJam',
-                    'Changes': [
-                        {
-                            'Action': 'UPSERT',
-                            'ResourceRecordSet': {
-                                'Name': validation_records['Name'],
-                                'Type': validation_records['Type'],
-                                'ResourceRecords': [
-                                    {
-                                        'Value': validation_records['Value']
-                                    }
-                                ]
+            for record in validation_records:
+                resource_record = record['ResourceRecord']
+
+                self.route53.change_resource_record_sets(
+                    HostedZoneId=zone['Id'],
+                    ChangeBatch={
+                        'Comment': 'Created by PyJam',
+                        'Changes': [
+                            {
+                                'Action': 'UPSERT',
+                                'ResourceRecordSet': {
+                                    'Name': resource_record['Name'],
+                                    'Type': resource_record['Type'],
+                                    'TTL': 60,
+                                    'ResourceRecords': [
+                                        {
+                                            'Value': resource_record['Value']
+                                        }
+                                    ]
+                                }
                             }
-                        }
-                    ]
-                }
-            )
+                        ]
+                    }
+                )
 
         except ClientError as err:
-            print('Unable to create DNS record for validation of domain {0}. '.format(
+            print('Unable to create CNAME record for validation of domain {0}. '.format(
                 domain_name
             ) + str(err) + '\n')
 
@@ -101,15 +105,14 @@ class ACMClient:
                 ValidationMethod='DNS',
                 SubjectAlternativeNames=[
                     alt_name,
-                ],
-                IdempotencyToken=str(uuid.uuid4())
+                ]
             )
 
-            certificate = self.describe_certificate(response['CertificateArn'])
+            certificate_arn = response['CertificateArn']
+            certificate = self.describe_certificate(certificate_arn)['Certificate']
+            self.create_cname_record(domain_name, certificate)
 
-            self.create_cname_record(domain_name, certificate['Certificate'])
-
-            self.await_validation(response)
+            self.await_validation(certificate_arn)
 
         except ClientError as err:
             print('Unable to request certificate for {0}. '.format(domain_name) + str(err) + '\n')
