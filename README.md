@@ -30,7 +30,7 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `jam setup domain <name>` - Create and configure a Route53 domain records for S3 or CloudFront.
 
-- `--s3`: create records to point to S3 bucket with corresponding domain name. NOTE: bucket name must be the same as domain name.
+- `--s3`: create records to point to S3 hosted website with corresponding domain name. NOTE: bucket name must be the same as domain name.
 
 - `--cf`: create records to point a CloudFront distribution. NOTE: distribution CNAME must point to the domain name.
 
