@@ -48,9 +48,15 @@ class CloudFrontClient:
     def create_distribution(self, domain_name):
         """Create a CloudFront distribution for domain with certificate"""
         try:
-            origin_id = 'S3-Website-' + domain_name
             region = get_bucket_region(self.session, domain_name)
+            origin_id = 'S3-Website-' + '{0}.{1}'.format(domain_name, get_endpoint(region).host)
             certificate = self.find_matching_cert(domain_name)
+
+            if not certificate:
+                print('\nError: no SSL certificate found.')
+                print('Please request a public certificate from the AWS Certificate Manager')
+                print('Add both your <domain> and *.<domain>\n')
+                return
 
             result = self.cloudfront.create_distribution(
                 DistributionConfig={
@@ -67,10 +73,11 @@ class CloudFrontClient:
                         'Items': [
                             {
                                 'Id': origin_id,
-                                'DomainName':
-                                '{0}.{1}'.format(domain_name, get_endpoint(region).host),
-                                'S3OriginConfig': {
-                                    'OriginAccessIdentity': ''
+                                'DomainName': '{0}.{1}'.format(domain_name, get_endpoint(region).host),
+                                'CustomOriginConfig': {
+                                    'HTTPPort': 80,
+                                    'HTTPSPort': 443,
+                                    'OriginProtocolPolicy': 'http-only'
                                 }
                             }
                         ]
@@ -100,7 +107,7 @@ class CloudFrontClient:
                 }
             )
 
-            self.await_deploy(result)
+            self.await_deploy(result['Distribution'])
 
             return result['Distribution']
 
@@ -113,6 +120,7 @@ class CloudFrontClient:
         waiter = self.cloudfront.get_waiter('distribution_deployed')
 
         print('Awaiting CloudFront distribution to be created...')
+
         waiter.wait(
             Id=distribution['Id'],
             WaiterConfig={

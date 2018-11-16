@@ -2,7 +2,7 @@
 
 import click
 from pyjam.constants import VERSION
-from pyjam.clients import S3Client, Route53Client
+from pyjam.clients import S3Client, Route53Client, CloudFrontClient
 
 @click.group()
 @click.version_option(version=VERSION)
@@ -96,6 +96,16 @@ def setup_domain(domain, s3, cf, **kwargs):
         client.create_s3_domain_record(domain)
     if cf:
         client.create_cf_domain_record(domain)
+
+
+@setup.command('cloudfront')
+@click.argument('domain')
+@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
+to use as credentials.')
+def setup_cloudfront(domain, **kwargs):
+    """Setup S3 bucket for website hosting [options]"""
+    client = CloudFrontClient(**kwargs)
+    client.create_distribution(domain)
 
 
 if __name__ == '__main__':
