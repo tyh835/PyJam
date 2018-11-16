@@ -1,6 +1,6 @@
 # PyJam
 
-Version: 0.2.1
+Version: 0.3.0
 
 ## About
 
@@ -58,6 +58,6 @@ Then, install the package using `pip3 install dist/<wheel-file-name-here>.whl`
 
 Or, you can install the package directly at:
 
-`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.2.1-py3-none-any`
+`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.3.0-py3-none-any`
 
 Then, run `jam --help` and you are all set!
