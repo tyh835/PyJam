@@ -1,8 +1,8 @@
 """ACM Client for PyJam"""
 
-import uuid
 import boto3
 from botocore.exceptions import ClientError
+from pyjam.utils.route53 import find_hosted_zone, create_hosted_zone
 
 
 class ACMClient:
@@ -29,37 +29,14 @@ class ACMClient:
             print('Unable to find certificate {0}. '.format(certificate_arn) + str(err) + '\n')
 
 
-    def find_hosted_zone(self, domain_name):
-        """Find a hosted zone matching domain"""
-        paginator = self.route53.get_paginator('list_hosted_zones')
-        for page in paginator.paginate():
-            for zone in page['HostedZones']:
-                if domain_name.endswith(zone['Name'][:-1]):
-                    return zone
-
-        return None
-
-
-    def create_hosted_zone(self, domain_name):
-        """Create a hosted zone to match domain"""
-        zone_name = '.'.join(domain_name.split('.')[-2:]) + '.'
-        try:
-            return self.route53.create_hosted_zone(
-                Name=zone_name,
-                CallerReference=str(uuid.uuid4())
-            )
-
-        except ClientError as err:
-            print('Unable to create hosted zone for {0}. '.format(domain_name) + str(err) + '\n')
-
-
     def create_cname_record(self, domain_name, certificate):
         """Create a CNAME record for domain certificate validation"""
         if domain_name[0] == '*':
             domain_name = domain_name[2:]
 
         try:
-            zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
+            zone = find_hosted_zone(self.route53, domain_name) \
+            or create_hosted_zone(self.route53, domain_name)
             validation_records = certificate['DomainValidationOptions']
 
             for record in validation_records:

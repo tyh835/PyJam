@@ -1,6 +1,5 @@
 """Route53 Client for PyJam"""
 
-import uuid
 import boto3
 from botocore.exceptions import ClientError
 from pyjam.utils.s3 import (
@@ -9,6 +8,7 @@ from pyjam.utils.s3 import (
     get_endpoint,
     get_bucket_region
 )
+from pyjam.utils.route53 import find_hosted_zone, create_hosted_zone
 
 class Route53Client:
     """Class for Route53 Client"""
@@ -21,30 +21,6 @@ class Route53Client:
         self.route53 = self.session.client('route53')
         self.s3 = self.session.resource('s3')
         self.cloudfront = self.session.client('cloudfront')
-
-
-    def find_hosted_zone(self, domain_name):
-        """Find a hosted zone matching domain"""
-        paginator = self.route53.get_paginator('list_hosted_zones')
-        for page in paginator.paginate():
-            for zone in page['HostedZones']:
-                if domain_name.endswith(zone['Name'][:-1]):
-                    return zone
-
-        return None
-
-
-    def create_hosted_zone(self, domain_name):
-        """Create a hosted zone to match domain"""
-        zone_name = '.'.join(domain_name.split('.')[-2:]) + '.'
-        try:
-            return self.route53.create_hosted_zone(
-                Name=zone_name,
-                CallerReference=str(uuid.uuid4())
-            )
-
-        except ClientError as err:
-            print('Unable to create hosted zone for {0}. '.format(domain_name) + str(err) + '\n')
 
 
     def find_matching_bucket(self, domain_name):
@@ -80,7 +56,8 @@ class Route53Client:
         try:
             self.find_matching_bucket(domain_name)
             region = get_bucket_region(self.session, domain_name)
-            zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
+            zone = find_hosted_zone(self.route53, domain_name) \
+            or create_hosted_zone(self.route53, domain_name)
             endpoint = get_endpoint(region)
 
             print('Creating Alias record for {0}...'.format(domain_name))
@@ -118,7 +95,8 @@ class Route53Client:
     def create_cf_domain_record(self, domain_name):
         """Create a domain record in hosted zone for CloudFront"""
         try:
-            zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
+            zone = find_hosted_zone(self.route53, domain_name) \
+            or create_hosted_zone(self.route53, domain_name)
             cf_domain = self.find_matching_distribution(domain_name).get('DomainName', None)
 
             if not cf_domain:
