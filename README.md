@@ -1,6 +1,6 @@
 # PyJam
 
-Version: 0.2.0
+Version: 0.2.1
 
 ## About
 
@@ -34,6 +34,8 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 - `--cf`: create records to point a CloudFront distribution. NOTE: distribution CNAME must point to the domain name.
 
+`jam setup cloudfront` - Create and configure a CloudFront distribution to cache a S3 hosted static website.
+
 `jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes stale files and checks for unnecessary uploads.
 
 ## Options
@@ -54,6 +56,6 @@ Then, install the package using `pip3 install dist/<wheel-file-name-here>.whl`
 
 Or, you can install the package directly at:
 
-`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.2.0-py3-none-any`
+`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.2.1-py3-none-any`
 
 Then, run `jam --help` and you are all set!
