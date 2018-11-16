@@ -54,7 +54,8 @@ class CloudFrontClient:
             if not certificate:
                 print('\nError: no SSL certificate found.')
                 print('Please request a public certificate from the AWS Certificate Manager')
-                print('Add both your <domain> and *.<domain>\n')
+                print('Add both your <domain> and *.<domain>')
+                print('and make sure to use us-east-1 (N. Virginia)!\n')
                 return
 
             result = self.cloudfront.create_distribution(
