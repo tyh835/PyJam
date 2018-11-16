@@ -39,6 +39,8 @@ class ACMClient:
             or create_hosted_zone(self.route53, domain_name)
             validation_records = certificate['DomainValidationOptions']
 
+            print('Creating CNAME record for DNS validation...')
+
             for record in validation_records:
                 resource_record = record['ResourceRecord']
 
@@ -78,6 +80,8 @@ class ACMClient:
             if domain_name and domain_name[0] == '*':
                 alt_name = domain_name[2:]
 
+            print('Requesting certificate for domain {0}...'.format(domain_name))
+
             response = self.acm.request_certificate(
                 DomainName=domain_name,
                 ValidationMethod='DNS',
@@ -88,8 +92,8 @@ class ACMClient:
 
             certificate_arn = response['CertificateArn']
             certificate = self.describe_certificate(certificate_arn)['Certificate']
-            self.create_cname_record(domain_name, certificate)
 
+            self.create_cname_record(domain_name, certificate)
             self.await_validation(certificate_arn)
 
         except ClientError as err:

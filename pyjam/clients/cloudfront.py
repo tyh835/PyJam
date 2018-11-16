@@ -58,6 +58,9 @@ class CloudFrontClient:
                 print('and make sure to use us-east-1 (N. Virginia)!\n')
                 return
 
+            print('Creating CloudFront distribution for {0}...'.format(bucket_name))
+            print('This may take some time.')
+
             response = self.cloudfront.create_distribution(
                 DistributionConfig={
                     'CallerReference': str(uuid.uuid4()),
@@ -120,8 +123,8 @@ class CloudFrontClient:
         """Wait for distribution to be deployed"""
         waiter = self.cloudfront.get_waiter('distribution_deployed')
 
-        print('Awaiting CloudFront distribution to be created...')
-        print('This may take some time.')
+        print('\nDomain configured: https://{0}'.format(distribution['DomainName']))
+        print('...')
 
         waiter.wait(
             Id=distribution['Id'],

@@ -104,6 +104,8 @@ class Route53Client:
                 print('Please run `jam setup distribution` first.\n')
                 return
 
+            print('Creating Alias record for {0}...'.format(domain_name))
+
             self.route53.change_resource_record_sets(
                 HostedZoneId=zone['Id'],
                 ChangeBatch={
