@@ -8,7 +8,7 @@ Version: 0.2.0
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
-This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project, which you can find here: [https://github.com/ACloudGuru/automating-aws-with-python/](https://github.com/ACloudGuru/automating-aws-with-python/)
+This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project.
 
 ## Configuring for Development
 
