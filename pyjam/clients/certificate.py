@@ -1,7 +1,6 @@
 """ACM Client for PyJam"""
 
 from time import sleep
-
 import boto3
 from botocore.exceptions import ClientError
 from pyjam.utils.route53 import find_hosted_zone, create_hosted_zone
@@ -69,8 +68,11 @@ class ACMClient:
                         }
                     )
 
+                    return True
+
                 except KeyError:
-                    raise Exception('\nSomething went wrong, please try again')
+                    print('AWS did not return a valid response. please try again in 5 seconds.')
+                    return False
 
         except ClientError as err:
             print('Unable to create CNAME record for validation of domain {0}. '.format(
@@ -94,10 +96,12 @@ class ACMClient:
             )
 
             certificate_arn = response['CertificateArn']
-            sleep(2)
+            sleep(6)
             certificate = self.describe_certificate(certificate_arn)['Certificate']
-            self.create_validation_record(domain_name, certificate)
-            self.await_validation(certificate_arn)
+            success = self.create_validation_record(domain_name, certificate)
+
+            if success:
+                self.await_validation(certificate_arn)
 
         except ClientError as err:
             print('Unable to request certificate for {0}. '.format(domain_name) + str(err) + '\n')
