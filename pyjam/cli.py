@@ -2,7 +2,7 @@
 
 import click
 from pyjam.constants import VERSION
-from pyjam.clients import S3Client, Route53Client, CloudFrontClient
+from pyjam.clients import S3Client, Route53Client, CloudFrontClient, ACMClient
 
 @click.group()
 @click.version_option(version=VERSION)
@@ -103,9 +103,19 @@ def setup_domain(domain_name, s3, cf, **kwargs):
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
 def setup_cloudfront(bucket_name, **kwargs):
-    """Setup S3 bucket for website hosting [options]"""
+    """Setup CloudFront Distribution for S3 bucket [options]"""
     client = CloudFrontClient(**kwargs)
     client.create_distribution(bucket_name)
+
+
+@setup.command('certificate')
+@click.argument('domain_name')
+@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
+to use as credentials.')
+def setup_certificate(domain_name, **kwargs):
+    """Setup ACM Certificate used by CloudFront [options]"""
+    client = ACMClient(**kwargs)
+    client.request_certificate(domain_name)
 
 
 if __name__ == '__main__':
