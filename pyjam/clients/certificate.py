@@ -1,5 +1,7 @@
 """ACM Client for PyJam"""
 
+from time import sleep
+
 import boto3
 from botocore.exceptions import ClientError
 from pyjam.utils.route53 import find_hosted_zone, create_hosted_zone
@@ -92,7 +94,7 @@ class ACMClient:
             )
 
             certificate_arn = response['CertificateArn']
-
+            sleep(2)
             certificate = self.describe_certificate(certificate_arn)['Certificate']
             self.create_validation_record(domain_name, certificate)
             self.await_validation(certificate_arn)
