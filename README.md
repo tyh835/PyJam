@@ -1,6 +1,6 @@
 # PyJam
 
-Version: 0.1.7
+Version: 0.2.0
 
 ## About
 
@@ -26,7 +26,13 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `jam list bucket <name>` - Lists all objects in an S3 bucket
 
-`jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Configures the bucket if it already exists.
+`jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Only configures the bucket if it already exists.
+
+`jam setup domain <name>` - Create and configure a Route53 domain records for S3 or CloudFront.
+
+- `--s3`: create records to point to S3 bucket with corresponding domain name. NOTE: bucket name must be the same as domain name.
+
+- `--cf`: create records to point a CloudFront distribution. NOTE: distribution CNAME must point to the domain name.
 
 `jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes stale files and checks for unnecessary uploads.
 
@@ -48,6 +54,6 @@ Then, install the package using `pip3 install dist/<wheel-file-name-here>.whl`
 
 Or, you can install the package directly at:
 
-`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.1.7-py3-none-any`
+`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.2.0-py3-none-any`
 
 Then, run `jam --help` and you are set!
