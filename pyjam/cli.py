@@ -82,20 +82,20 @@ def setup_bucket(bucket_name, **kwargs):
 
 
 @setup.command('domain')
-@click.argument('domain')
+@click.argument('domain_name')
 @click.option('--s3', is_flag=True, default=False, help='Setup domain record for S3 bucket')
 @click.option('--cf', is_flag=True, default=False, help='Setup domain record for CloudFront')
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
-def setup_domain(domain, s3, cf, **kwargs):
+def setup_domain(domain_name, s3, cf, **kwargs):
     """Setup S3 bucket for website hosting [options]"""
     client = Route53Client(**kwargs)
     if not s3 and not cf:
         print('Error: please specify an option (--s3 or --cf)')
     if s3:
-        client.create_s3_domain_record(domain)
+        client.create_s3_domain_record(domain_name)
     if cf:
-        client.create_cf_domain_record(domain)
+        client.create_cf_domain_record(domain_name)
 
 
 @setup.command('cloudfront')
