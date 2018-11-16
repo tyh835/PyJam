@@ -130,3 +130,5 @@ class CloudFrontClient:
                 'MaxAttempts': 50
             }
         )
+
+        print('\nSuccess!')
