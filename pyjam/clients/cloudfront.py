@@ -73,7 +73,10 @@ class CloudFrontClient:
                         'Items': [
                             {
                                 'Id': origin_id,
-                                'DomainName': '{0}.{1}'.format(bucket_name, get_endpoint(region).host),
+                                'DomainName': '{0}.{1}'.format(
+                                    bucket_name,
+                                    get_endpoint(region).host
+                                ),
                                 'CustomOriginConfig': {
                                     'HTTPPort': 80,
                                     'HTTPSPort': 443,
