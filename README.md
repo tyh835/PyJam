@@ -56,4 +56,4 @@ Or, you can install the package directly at:
 
 `pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.2.0-py3-none-any`
 
-Then, run `jam --help` and you are set!
+Then, run `jam --help` and you are all set!
