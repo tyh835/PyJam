@@ -3,7 +3,7 @@
 import uuid
 import boto3
 from botocore.exceptions import ClientError
-from pyjam.clients import Route53Client
+
 
 class ACMClient:
     """Class for ACM Client"""
@@ -91,6 +91,7 @@ class ACMClient:
             print('Unable to create CNAME record for validation of domain {0}. '.format(
                 domain_name
             ) + str(err) + '\n')
+
 
     def request_certificate(self, domain_name):
         """Requests an ACM SSL certificate for your domain"""
