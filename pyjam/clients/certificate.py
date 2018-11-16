@@ -53,10 +53,40 @@ class ACMClient:
             print('Unable to create hosted zone for {0}. '.format(domain_name) + str(err) + '\n')
 
 
-    def create_cname_record(self, certificate):
+    def create_cname_record(self, domain_name, certificate):
         """Create a CNAME record for domain certificate validation"""
+        if domain_name[0] == '*':
+            domain_name = domain_name[2:]
 
+        try:
+            zone = self.find_hosted_zone(domain_name) or self.create_hosted_zone(domain_name)
+            validation_records = certificate['DomainValidationOptions']['ResourceRecord']
 
+            self.route53.change_resource_record_sets(
+                HostedZoneId=zone['Id'],
+                ChangeBatch={
+                    'Comment': 'Created by PyJam',
+                    'Changes': [
+                        {
+                            'Action': 'UPSERT',
+                            'ResourceRecordSet': {
+                                'Name': validation_records['Name'],
+                                'Type': validation_records['Type'],
+                                'ResourceRecords': [
+                                    {
+                                        'Value': validation_records['Value']
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            )
+
+        except ClientError as err:
+            print('Unable to create DNS record for validation of domain {0}. '.format(
+                domain_name
+            ) + str(err) + '\n')
 
     def request_certificate(self, domain_name):
         """Requests an ACM SSL certificate for your domain"""
@@ -77,7 +107,7 @@ class ACMClient:
 
             certificate = self.describe_certificate(response['CertificateArn'])
 
-            self.create_cname_record(certificate)
+            self.create_cname_record(domain_name, certificate['Certificate'])
 
             self.await_validation(response)
 
