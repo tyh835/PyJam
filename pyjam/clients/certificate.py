@@ -70,7 +70,7 @@ class ACMClient:
                     )
 
                 except KeyError:
-                    print('\nSomething went wrong, please try again')
+                    raise Exception('\nSomething went wrong, please try again')
 
         except ClientError as err:
             print('Unable to create CNAME record for validation of domain {0}. '.format(
