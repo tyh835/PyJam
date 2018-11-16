@@ -8,7 +8,7 @@ Version: 0.2.1
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
-This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project.
+This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project. Improvements include error handling, API, deleting stale files on sync, and configuring CloudFront to directly cache S3 website hosting URL.
 
 ## Configuring for Development
 
@@ -28,6 +28,8 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Only configures the bucket if it already exists.
 
+- `--region` specifies the AWS region to setup the S3 bucket.
+
 `jam setup domain <name>` - Create and configure a Route53 domain records for S3 or CloudFront.
 
 - `--s3`: create records to point to S3 hosted website with corresponding domain name. NOTE: bucket name must be the same as domain name.
@@ -39,8 +41,6 @@ The profile should be an AWS power user (more restrictive permissions pending).
 `jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes stale files and checks for unnecessary uploads.
 
 ## Options
-
-`--region` specifies the AWS region of the resources.
 
 `--profile` specifies the AWS profile to use as credentials.
 
