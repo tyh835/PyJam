@@ -29,7 +29,7 @@ class ACMClient:
             print('Unable to find certificate {0}. '.format(certificate_arn) + str(err) + '\n')
 
 
-    def create_cname_record(self, domain_name, certificate):
+    def create_validation_record(self, domain_name, certificate):
         """Create a CNAME record for domain certificate validation"""
         if domain_name[0] == '*':
             domain_name = domain_name[2:]
@@ -93,7 +93,7 @@ class ACMClient:
             certificate_arn = response['CertificateArn']
             certificate = self.describe_certificate(certificate_arn)['Certificate']
 
-            self.create_cname_record(domain_name, certificate)
+            self.create_validation_record(domain_name, certificate)
             self.await_validation(certificate_arn)
 
         except ClientError as err:
