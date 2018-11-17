@@ -10,15 +10,11 @@ Serving static site with rich functionalities from a CDN is the basis of the JAM
 
 This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project. Improvements include error handling, API, deleting stale files on sync, ability to request SSL certificates, and configuring CloudFront to directly cache S3 website hosting URL.
 
-## Configuring for Development
+## Installation
 
-Run `pipenv install` in the file directory.
+To install the package, use `pip` by running `pip3 install pyjam`.
 
-If you don't yet have `pipenv`, install at [https://pipenv.readthedocs.io/en/latest/](https://pipenv.readthedocs.io/en/latest/)
-
-Use the standard configuration on the AWS CLI. e.g. `aws configure` and add your Access and Secret keys.
-
-The profile should be an AWS power user (more restrictive permissions pending).
+Then, run `jam --help` and you are all set!
 
 ## Commands
 
@@ -46,18 +42,12 @@ The profile should be an AWS power user (more restrictive permissions pending).
 
 `--profile` specifies the AWS profile to use as credentials.
 
-## Installation
+## Configuring for Development
 
-You can build from source by cloning the this git repository:
+Run `pipenv install` in the file directory.
 
-`git clone https://github.com/tyh835/pyjam.git`
+If you don't yet have `pipenv`, install at [https://pipenv.readthedocs.io/en/latest/](https://pipenv.readthedocs.io/en/latest/)
 
-and build by running `cd pyjam && pipenv install` and `pipenv run python setup.py bdist_wheel`.
+Use the standard configuration on the AWS CLI. e.g. `aws configure` and add your Access and Secret keys.
 
-Then, install the package using `pip3 install dist/<wheel-file-name-here>.whl`
-
-Or, you can install the package directly at:
-
-`pip3 install https://s3-us-west-2.amazonaws.com/tyh835-bin/pyjam-0.3.0-py3-none-any`
-
-Then, run `jam --help` and you are all set!
+The profile should be an AWS power user (more restrictive permissions pending).
