@@ -1,1 +1,1 @@
-# noop
+name = "pyjam"

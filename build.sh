@@ -5,7 +5,7 @@ rm -rf build dist pyjam.egg-info
 pip3 uninstall pyjam -y
 
 # build
-pipenv run python setup.py bdist_wheel
+pipenv run python setup.py sdist bdist_wheel
 
 # install
 pip3 install dist/*.whl

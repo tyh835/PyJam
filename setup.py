@@ -19,5 +19,10 @@ setup(
         [console_scripts]
         jam=pyjam.cli:cli
     ''',
-    platforms=['any']
+    platforms=['any'],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Operating System :: OS Independent",
+    ]
 )
