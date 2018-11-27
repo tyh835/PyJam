@@ -65,7 +65,7 @@ def sync(path, bucket, **kwargs):
 
 @cli.group('setup')
 def setup():
-    """Command for setting up S3 buckets, Route53, and CloudFront"""
+    """Command for setting up S3 buckets, Route53, ACM, and CloudFront"""
     pass
 
 
