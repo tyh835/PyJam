@@ -8,7 +8,7 @@ Version: 0.3.2
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
-This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project. Improvements include error handling, API, deleting stale files on sync, ability to request SSL certificates, and configuring CloudFront to directly cache S3 website hosting URL.
+This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with Python's project. Additional features include improved error handling, cleaner API, better S3 syncing, setup for SSL certificates, and properly configured CloudFront for S3 website hosting.
 
 ## Installation
 
