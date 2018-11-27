@@ -76,7 +76,7 @@ to create the bucket.')
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
-    """Setup S3 bucket for website hosting [options]"""
+    """Setup S3 bucket for website hosting. Ensure bucket name is the same as domain [options]"""
     client = S3Client(**kwargs)
     return client.setup_hosting_bucket(bucket_name)
 
@@ -88,7 +88,7 @@ def setup_bucket(bucket_name, **kwargs):
 @click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
 to use as credentials.')
 def setup_domain(domain_name, s3, cf, **kwargs):
-    """Setup S3 bucket for website hosting [options]"""
+    """Setup Route53 domain for hosting S3 website or CloudFront Distribution [options]"""
     client = Route53Client(**kwargs)
     if not s3 and not cf:
         print('Error: please specify an option (--s3 or --cf)')
