@@ -4,7 +4,7 @@ Version: 0.3.2
 
 ## About
 
-`jam` is a CLI tool to deploy static sites to AWS. It can sync to an S3 bucket, and configuring it for static site hosting. It can also optionally configure Route53, ACM SSL Certificate and CloudFront.
+`pyjam` is a CLI tool to deploy static sites to AWS. It can sync to an S3 bucket, and configuring it for static site hosting. It can also optionally configure Route53, ACM SSL Certificate and CloudFront.
 
 Serving static site with rich functionalities from a CDN is the basis of the JAM stack. Find out more about the JAM stack here: [https://jamstack.org/](https://jamstack.org/)
 
@@ -12,7 +12,7 @@ This project is based on [acloud.guru](acloud.guru)'s course Automating AWS with
 
 ## Installation
 
-To install the package, use `pip` by running `pip3 install pyjam`.
+To install the package, use `pip3` by running `pip3 install pyjam`.
 
 Then, run `jam --help` and you are all set!
 
