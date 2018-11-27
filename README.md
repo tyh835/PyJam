@@ -1,4 +1,4 @@
-# pyJam
+# pyjam
 
 Version: 0.3.2
 
