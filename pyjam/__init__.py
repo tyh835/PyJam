@@ -1,1 +1,2 @@
+"""Module pyjam"""
 name = "pyjam"

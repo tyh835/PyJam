@@ -11,10 +11,7 @@ setup(
     license='GPLv3+',
     packages=find_packages(exclude=['test*']),
     url='https://github.com/tyh835/pydeploy',
-    install_requires=[
-        'click',
-        'boto3'
-    ],
+    install_requires=['click', 'boto3'],
     entry_points='''
         [console_scripts]
         jam=pyjam.cli:cli
@@ -24,5 +21,4 @@ setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
-    ]
-)
+    ])
