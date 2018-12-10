@@ -15,30 +15,24 @@ class S3Client:
 
     def __init__(self, **kwargs):
         """Setup S3 Client Configurations"""
-        params = {k:v for k, v in kwargs.items() if v is not None}
+        params = {k: v for k, v in kwargs.items() if v is not None}
 
         self.session = boto3.Session(**params)
         self.s3 = self.session.resource('s3')
         self.transfer_config = boto3.s3.transfer.TransferConfig(
-            multipart_chunksize=CHUNK_SIZE,
-            multipart_threshold=CHUNK_SIZE
-        )
+            multipart_chunksize=CHUNK_SIZE, multipart_threshold=CHUNK_SIZE)
         self.checksums = {}
         self.new_checksums = {}
-
 
     def get_bucket_endpoint(self, bucket_name):
         """Get the S3 endpoints for this bucket."""
         return get_endpoint(get_bucket_region(self.session, bucket_name))
 
-
     def get_bucket_url(self, bucket_name):
         """Get the website URL for this bucket."""
         return "http://{}.{}".format(
             bucket_name,
-            get_endpoint(get_bucket_region(self.session, bucket_name)).host
-        )
-
+            get_endpoint(get_bucket_region(self.session, bucket_name)).host)
 
     def load_checksums(self, bucket_name):
         """Load etag metadata for caching purposes."""
@@ -46,7 +40,6 @@ class S3Client:
         for page in paginator.paginate(Bucket=bucket_name):
             for obj in page.get('Contents', []):
                 self.checksums[obj['Key']] = obj['ETag']
-
 
     def create_bucket(self, bucket_name):
         """Creates new S3 bucket in given region"""
@@ -60,24 +53,21 @@ class S3Client:
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
                     'LocationConstraint': self.session.region_name
-                }
-            )
+                })
 
         except ClientError as err:
             if err.response['Error']['Code'] == 'BucketAlreadyOwnedByYou':
                 print('{0} already exists. Continuing...'.format(bucket_name))
                 return self.s3.Bucket(bucket_name)
 
-            print('Unable to create bucket: {0}.'.format(bucket_name) + str(err))
+            print('Unable to create bucket: {0}.'.format(bucket_name) +
+                  str(err))
             raise err
-
 
     def print_buckets(self):
         """Lists all S3 buckets"""
         for bucket in self.s3.buckets.all():
             print('s3://' + bucket.name)
-
-
 
     def print_objects(self, bucket_name):
         """Lists all objects in the given bucket"""
@@ -86,8 +76,8 @@ class S3Client:
                 print(obj.key)
 
         except ClientError as err:
-            print('Unable to list bucket: {0}. '.format(bucket_name) + str(err) + '\n')
-
+            print('Unable to list bucket: {0}. '.format(bucket_name) +
+                  str(err) + '\n')
 
     def setup_hosting_bucket(self, bucket_name):
         """Setup S3 bucket for website hosting"""
@@ -95,11 +85,11 @@ class S3Client:
             bucket = self.create_bucket(bucket_name)
             set_bucket_policy(bucket)
             set_website_config(bucket)
-            print('\nSuccess! URL: {0}'.format(self.get_bucket_url(bucket_name)))
+            print('\nSuccess! URL: {0}'.format(
+                self.get_bucket_url(bucket_name)))
 
         except ClientError:
             print('\nFailed to setup bucket: {0}. '.format(bucket_name))
-
 
     def sync_to_bucket(self, path, bucket_name):
         """Sync path recursively to the given bucket"""
@@ -107,13 +97,11 @@ class S3Client:
         bucket = self.s3.Bucket(bucket_name)
         root_path = Path(path).expanduser().resolve()
 
-
         def recursive_upload(bucket, target_path):
             """Uploads files recursively from root path to S3 bucket"""
             for path in target_path.iterdir():
                 if path.is_dir():
                     recursive_upload(bucket, path)
-
 
                 if path.is_file():
                     key = str(path.relative_to(root_path))
@@ -124,14 +112,15 @@ class S3Client:
                     self.new_checksums[key] = etag
 
         try:
-            print('\nBegin syncing {0} to bucket {1}...\n'.format(path, bucket_name))
+            print('\nBegin syncing {0} to bucket {1}...\n'.format(
+                path, bucket_name))
             recursive_upload(bucket, root_path)
             self.delete_objects(bucket)
             print('\nSuccess!')
 
         except ClientError:
-            print('\nUnable to sync path: {0} to bucket: {1}. '.format(path, bucket_name))
-
+            print('\nUnable to sync path: {0} to bucket: {1}. '.format(
+                path, bucket_name))
 
     def upload_file(self, bucket, path, key):
         """Uploads file to S3 bucket"""
@@ -144,25 +133,19 @@ class S3Client:
 
         try:
             print('Uploading {0} to {1} (content-type: {2}).'.format(
-                key,
-                bucket.name,
-                content_type
-            ))
+                key, bucket.name, content_type))
             bucket.upload_file(
                 path,
                 key,
-                ExtraArgs={
-                    'ContentType': content_type
-                },
-                Config=self.transfer_config
-            )
+                ExtraArgs={'ContentType': content_type},
+                Config=self.transfer_config)
 
             return checksum
 
         except ClientError as err:
-            print('Unable to upload file: {0} to {1}. '.format(path, bucket.name) + str(err))
+            print('Unable to upload file: {0} to {1}. '.format(
+                path, bucket.name) + str(err))
             raise err
-
 
     def delete_objects(self, bucket):
         """Deletes obsolete objects in bucket based on checksum"""
@@ -170,9 +153,11 @@ class S3Client:
             for obj in bucket.objects.all():
                 key = obj.key
 
-                if self.checksums.get(key, '') and not self.new_checksums.get(key, ''):
+                if self.checksums.get(
+                        key, '') and not self.new_checksums.get(key, ''):
                     print('Deleting {0} from {1}.'.format(key, bucket.name))
                     obj.delete()
 
         except ClientError as err:
-            print('Unable to delete object in {0}. '.format(bucket.name) + str(err) + '\n')
+            print('Unable to delete object in {0}. '.format(bucket.name) +
+                  str(err) + '\n')

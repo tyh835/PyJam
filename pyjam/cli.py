@@ -4,6 +4,7 @@ import click
 from pyjam.constants import VERSION
 from pyjam.clients import S3Client, Route53Client, CloudFrontClient, ACMClient
 
+
 @click.group()
 @click.version_option(version=VERSION)
 def cli():
@@ -13,6 +14,7 @@ def cli():
     Append [options] to the end of the command
     """
     pass
+
 
 ###
 ### PyJam list commands
@@ -26,8 +28,11 @@ def lst():
 
 
 @lst.command('buckets')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def list_buckets(**kwargs):
     """Lists all S3 buckets [options]"""
     client = S3Client(**kwargs)
@@ -36,8 +41,11 @@ def list_buckets(**kwargs):
 
 @lst.command('bucket')
 @click.argument('bucket_name')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def list_bucket_objects(bucket_name, **kwargs):
     """Lists objects in an S3 bucket [options]"""
     client = S3Client(**kwargs)
@@ -48,15 +56,20 @@ def list_bucket_objects(bucket_name, **kwargs):
 ### PyJam sync command
 ###
 
+
 @cli.command('sync')
 @click.argument('path', type=click.Path(exists=True))
 @click.argument('bucket')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def sync(path, bucket, **kwargs):
     """Command for syncing contents of PATH recursively to S3 BUCKET"""
     client = S3Client(**kwargs)
     return client.sync_to_bucket(path, bucket)
+
 
 ###
 ### PyJam setup commands
@@ -71,10 +84,16 @@ def setup():
 
 @setup.command('bucket')
 @click.argument('bucket_name')
-@click.option('--region', 'region_name', default=None, help='Specify the AWS region \
-to create the bucket.')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--region',
+    'region_name',
+    default=None,
+    help='Specify the AWS region to create the bucket.')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
     """Setup S3 bucket for website hosting. Ensure bucket name is the same as domain [options]"""
     client = S3Client(**kwargs)
@@ -83,10 +102,21 @@ def setup_bucket(bucket_name, **kwargs):
 
 @setup.command('domain')
 @click.argument('domain_name')
-@click.option('--s3', is_flag=True, default=False, help='Setup domain record for S3 bucket')
-@click.option('--cf', is_flag=True, default=False, help='Setup domain record for CloudFront')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--s3',
+    is_flag=True,
+    default=False,
+    help='Setup domain record for S3 bucket')
+@click.option(
+    '--cf',
+    is_flag=True,
+    default=False,
+    help='Setup domain record for CloudFront')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def setup_domain(domain_name, s3, cf, **kwargs):
     """Setup Route53 domain for hosting S3 website or CloudFront Distribution [options]"""
     client = Route53Client(**kwargs)
@@ -100,8 +130,11 @@ def setup_domain(domain_name, s3, cf, **kwargs):
 
 @setup.command('cloudfront')
 @click.argument('bucket_name')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def setup_cloudfront(bucket_name, **kwargs):
     """Setup CloudFront Distribution for S3 bucket [options]"""
     client = CloudFrontClient(**kwargs)
@@ -110,8 +143,11 @@ def setup_cloudfront(bucket_name, **kwargs):
 
 @setup.command('certificate')
 @click.argument('domain_name')
-@click.option('--profile', 'profile_name', default=None, help='Specify the AWS profile \
-to use as credentials.')
+@click.option(
+    '--profile',
+    'profile_name',
+    default=None,
+    help='Specify the AWS profile to use as credentials.')
 def setup_certificate(domain_name, **kwargs):
     """Setup ACM Certificate used by CloudFront [options]"""
     client = ACMClient(**kwargs)
