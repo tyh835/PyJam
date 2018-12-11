@@ -16,25 +16,37 @@ To install the package, use `pip3` by running `pip3 install pyjam`.
 
 Then, run `jam --help` and you are all set!
 
+## Quick Start
+
+To deploy a static site to AWS using `pyjam`, make sure you have an AWS account and purchase a domain name on Route53. Also, check that you can make a S3 bucket of the same name, by running `jam setup bucket <domain-name>`.
+
+Next, upload your static site contents by running `jam sync <path-to-dir> <domain-name>`.
+
+Then, setup CloudFront content delivery simply by running `jam setup cloudfront <domain-name>`.
+
+Configure your Route53 DNS to point to CloudFront by running `jam setup domain <domain-name> --cf`.
+
+Finally, request a SSL certificate using `jam setup certificate <domain-name>`, and you are all set!
+
 ## Commands
 
 `jam list buckets` - Lists all S3 buckets
 
-`jam list bucket <name>` - Lists all objects in an S3 bucket
+`jam list bucket <bucket-name>` - Lists all objects in an S3 bucket
 
-`jam setup bucket <name>` - Create and configure an S3 bucket for static site hosting. Only configures the bucket if it already exists.
+`jam setup bucket <bucket-name>` - Create and configure an S3 bucket for static site hosting. Only configures the bucket if it already exists.
 
 - `--region` specifies the AWS region to setup the S3 bucket.
 
-`jam setup domain <name>` - Create and configure a Route53 domain records for S3 or CloudFront.
+`jam setup domain <domain-name>` - Create and configure a Route53 domain records for S3 or CloudFront.
 
 - `--s3`: create records to point to S3 hosted website with corresponding domain name. NOTE: bucket name must be the same as domain name.
 
 - `--cf`: create records to point a CloudFront distribution. NOTE: distribution CNAME must point to the domain name.
 
-`jam setup certificate` - Create and configure an ACM certificate to use for CloudFront distribution. Works with Route53 issued domain names.
+`jam setup certificate <domain-name>` - Create and configure an ACM certificate to use for CloudFront distribution. Works with Route53 issued domain names.
 
-`jam setup cloudfront` - Create and configure a CloudFront distribution to cache a S3 hosted static website.
+`jam setup cloudfront <bucket-name>` - Create and configure a CloudFront distribution to cache a S3 hosted static website.
 
 `jam sync <path-name> <bucket-name>` - Sync file directory recursively to S3 bucket. Removes stale files and checks for unnecessary uploads.
 
