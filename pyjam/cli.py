@@ -16,9 +16,9 @@ def cli():
     pass
 
 
-###
-### PyJam list commands
-###
+"""
+PyJam list commands
+"""
 
 
 @cli.group('list')
@@ -52,9 +52,9 @@ def list_bucket_objects(bucket_name, **kwargs):
     return client.print_objects(bucket_name)
 
 
-###
-### PyJam sync command
-###
+"""
+PyJam sync command
+"""
 
 
 @cli.command('sync')
@@ -71,9 +71,9 @@ def sync(path, bucket, **kwargs):
     return client.sync_to_bucket(path, bucket)
 
 
-###
-### PyJam setup commands
-###
+"""
+PyJam setup commands
+"""
 
 
 @cli.group('setup')
@@ -95,7 +95,10 @@ def setup():
     default=None,
     help='Specify the AWS profile to use as credentials.')
 def setup_bucket(bucket_name, **kwargs):
-    """Setup S3 bucket for website hosting. Ensure bucket name is the same as domain [options]"""
+    """
+    Setup S3 bucket for website hosting.
+    Ensure bucket name is the same as domain [options]
+    """
     client = S3Client(**kwargs)
     return client.setup_hosting_bucket(bucket_name)
 
@@ -118,7 +121,10 @@ def setup_bucket(bucket_name, **kwargs):
     default=None,
     help='Specify the AWS profile to use as credentials.')
 def setup_domain(domain_name, s3, cf, **kwargs):
-    """Setup Route53 domain for hosting S3 website or CloudFront Distribution [options]"""
+    """
+    Setup Route53 domain for hosting S3 website
+    or CloudFront Distribution [options]
+    """
     client = Route53Client(**kwargs)
     if not s3 and not cf:
         print('Error: please specify an option (--s3 or --cf)')
